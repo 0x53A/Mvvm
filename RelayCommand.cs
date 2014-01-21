@@ -12,6 +12,16 @@ namespace Mvvm
         Func<object, bool> _canExecute;
         Action<object> _execute;
 
+        public RelayCommand(Action execute) : this((o)=>execute(), (o)=>true)
+        {
+
+        }
+
+        public RelayCommand(Action execute, Func<bool> canExecute) : this(o=>execute(), o=>canExecute())
+        {
+
+        }
+
         public RelayCommand(Action<object> execute, Func<object, bool> canExecute)
         {
             _canExecute = canExecute;
@@ -34,6 +44,14 @@ namespace Mvvm
         void ICommand.Execute(object parameter)
         {
             _execute(parameter);
+        }
+    }
+
+    public class RelayCommand<T> : RelayCommand
+    {
+        public RelayCommand(Action<T> execute, Func<T,bool> canExecute) : base((o)=>execute((T)o), (o)=>canExecute((T)o))
+        {
+
         }
     }
 }

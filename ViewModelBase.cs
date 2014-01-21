@@ -29,5 +29,12 @@ namespace Mvvm
                 field = defaultValue();
             return field;
         }
+
+        protected T LazyInitialize<T>(ref T field) where T : class, new()
+        {
+            if (field == null)
+                field = new T();
+            return field;
+        }
     }
 }
