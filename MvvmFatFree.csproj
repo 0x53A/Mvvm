@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="EventToCommand.cs" />
     <Compile Include="EventTriggerCommand.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="G.cs" />
     <Compile Include="IEventTriggerCommand.cs" />
     <Compile Include="ObservableCollectionExtensions.cs" />
