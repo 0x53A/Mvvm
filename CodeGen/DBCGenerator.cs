@@ -51,6 +51,28 @@ namespace Mvvm.CodeGen
             return (T)Activator.CreateInstance(mappedType);
         }
 
+        /// <summary>
+        /// the attributes of the generated type
+        /// </summary>
+        const TypeAttributes GeneratedTypeAttributes = TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.AutoClass |
+                TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit | TypeAttributes.AutoLayout;
+
+        /// <summary>
+        /// the attributes of a normal public .ctor
+        /// </summary>
+        const MethodAttributes ConstructorAttributes = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName | MethodAttributes.HideBySig;
+
+        /// <summary>
+        /// Attributes for a method implementing an interface
+        /// </summary>
+        const MethodAttributes InterfaceImplementationAttributes = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.NewSlot |
+               MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.Final;
+
+        /// <summary>
+        /// the Attributes for a normal, nonvirtual instance method
+        /// </summary>
+        const MethodAttributes PrivateInstanceMethodAttributes = MethodAttributes.Private | MethodAttributes.HideBySig;
+
         static Type CreateType(Type targetType)
         {
             var assemblyName = "assembly_{0}_{1}".FormatWith(targetType.FullName, Guid.NewGuid());
@@ -61,24 +83,36 @@ namespace Mvvm.CodeGen
 #endif
             var ab = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName), access);
             var mb = ab.DefineDynamicModule("generated");
-            var tb = mb.DefineType("dbc_{0}".FormatWith(targetType.FullName),
-                TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.AutoClass |
-                TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit | TypeAttributes.AutoLayout,
-                null, new[] { targetType, typeof(INotifyPropertyChanged) });
+            var tb = mb.DefineType("dbc_{0}".FormatWith(targetType.FullName), GeneratedTypeAttributes, null, new[] { targetType, typeof(INotifyPropertyChanged) });
 
-            var constructor = tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
+            var constructor = tb.DefineConstructor(ConstructorAttributes, CallingConventions.HasThis, null);
+            var ctorIL = constructor.GetILGenerator();
 
             var raiseMethod = ImplementINPC(tb);
 
             foreach (var property in targetType.GetProperties())
-                CreateProperty(tb, property);
+            {
+                if (property.CanRead && property.CanWrite)
+                    CreateReadWriteProperty(tb, property);
+                else if (property.CanRead)
+                    CreateReadOnlyLazyProperty(tb, property, ctorIL);
+            }
 
+            //emit the default constructor
+            ctorIL.Emit(OpCodes.Ldarg_0);
+            ctorIL.Emit(OpCodes.Call, typeof(Object).GetConstructor(Type.EmptyTypes));
+            ctorIL.Emit(OpCodes.Nop);
+            ctorIL.Emit(OpCodes.Ret);
+
+            //create and return type
             var type = tb.CreateType();
 #if DEBUG
             ab.Save("{0}.dll".FormatWith(assemblyName));
 #endif
             return type;
         }
+
+        #region INotifyPropertyChanged
 
         static MethodBuilder ImplementINPC(TypeBuilder tb)
         {
@@ -105,10 +139,7 @@ namespace Mvvm.CodeGen
             string prefix = isAdd ? "add_" : "remove_";
             string delegateAction = isAdd ? "Combine" : "Remove";
 
-            MethodBuilder addremoveMethod = typeBuilder.DefineMethod(prefix + "PropertyChanged",
-               MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.NewSlot |
-               MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.Final,
-               null, new[] { typeof(PropertyChangedEventHandler) });
+            MethodBuilder addremoveMethod = typeBuilder.DefineMethod(prefix + "PropertyChanged", InterfaceImplementationAttributes, null, new[] { typeof(PropertyChangedEventHandler) });
 
             MethodImplAttributes eventMethodFlags = MethodImplAttributes.Managed | MethodImplAttributes.Synchronized;
             addremoveMethod.SetImplementationFlags(eventMethodFlags);
@@ -133,8 +164,7 @@ namespace Mvvm.CodeGen
 
         private static MethodBuilder CreateRaisePropertyChanged(TypeBuilder typeBuilder, FieldBuilder eventField)
         {
-            MethodBuilder raisePropertyChangedBuilder = typeBuilder.DefineMethod("RaisePropertyChanged",
-                MethodAttributes.Family | MethodAttributes.Virtual, null, new Type[] { typeof(string) });
+            MethodBuilder raisePropertyChangedBuilder = typeBuilder.DefineMethod("RaisePropertyChanged", PrivateInstanceMethodAttributes, null, new Type[] { typeof(string) });
 
             ILGenerator raisePropertyChangedIl = raisePropertyChangedBuilder.GetILGenerator();
             Label labelExit = raisePropertyChangedIl.DefineLabel();
@@ -165,23 +195,63 @@ namespace Mvvm.CodeGen
             return raisePropertyChangedBuilder;
         }
 
-        static void CreateProperty(TypeBuilder tb, PropertyInfo property)
+        #endregion
+
+        static void CreateReadOnlyLazyProperty(TypeBuilder tb, PropertyInfo property, ILGenerator ctor)
         {
             var propertyName = property.Name;
             var propertyType = property.PropertyType;
 
+            //backing field
+            var lazyType = typeof(Lazy<>).MakeGenericType(propertyType);
+            var fb = tb.DefineField("_backing_" + propertyName, lazyType, FieldAttributes.Private);
+
+            //property
+            var pb = tb.DefineProperty(propertyName, PropertyAttributes.None, propertyType, null);
+
+            //getter
+            var getMethod = tb.DefineMethod("get_" + propertyName, InterfaceImplementationAttributes, propertyType, Type.EmptyTypes);
+            var getIL = getMethod.GetILGenerator();
+            getIL.DeclareLocal(propertyType);
+            getIL.Emit(OpCodes.Nop);
+            getIL.Emit(OpCodes.Ldarg_0);
+            getIL.Emit(OpCodes.Ldfld, fb);
+            getIL.EmitCall(OpCodes.Callvirt, lazyType.GetProperty("Value").GetGetMethod(), null);
+            getIL.Emit(OpCodes.Stloc_0);
+            getIL.Emit(OpCodes.Nop); //originally a br.s to the next line
+            getIL.Emit(OpCodes.Ldloc_0);
+            getIL.Emit(OpCodes.Ret);
+
+            //combine getter and property
+            pb.SetGetMethod(getMethod);
+
+            //initialize Lazy<T> in .ctor
+            ctor.Emit(OpCodes.Ldarg_0);
+            ctor.Emit(OpCodes.Newobj, lazyType.GetConstructor(Type.EmptyTypes));
+            ctor.Emit(OpCodes.Stfld, fb);
+        }
+
+        static void CreateReadWriteProperty(TypeBuilder tb, PropertyInfo property)
+        {
+            var propertyName = property.Name;
+            var propertyType = property.PropertyType;
+
+            //backing
             var fb = tb.DefineField("_backing_" + propertyName, propertyType, FieldAttributes.Private);
 
+            //property
             var pb = tb.DefineProperty(propertyName, PropertyAttributes.None, propertyType, null);
-            var attributes = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.Virtual;
-            var getMethod = tb.DefineMethod("get_" + propertyName, attributes, propertyType, Type.EmptyTypes);
+
+            //getter
+            var getMethod = tb.DefineMethod("get_" + propertyName, InterfaceImplementationAttributes, propertyType, Type.EmptyTypes);
             var getIL = getMethod.GetILGenerator();
 
             getIL.Emit(OpCodes.Ldarg_0);
             getIL.Emit(OpCodes.Ldfld, fb);
             getIL.Emit(OpCodes.Ret);
 
-            var setMethod = tb.DefineMethod("set_" + propertyName, attributes, null, new[] { propertyType });
+            //setter
+            var setMethod = tb.DefineMethod("set_" + propertyName, InterfaceImplementationAttributes, null, new[] { propertyType });
 
             var setIL = setMethod.GetILGenerator();
             setIL.Emit(OpCodes.Ldarg_0);
@@ -189,6 +259,7 @@ namespace Mvvm.CodeGen
             setIL.Emit(OpCodes.Stfld, fb);
             setIL.Emit(OpCodes.Ret);
 
+            //combine property, getter, setter 
             pb.SetGetMethod(getMethod);
             pb.SetSetMethod(setMethod);
         }
