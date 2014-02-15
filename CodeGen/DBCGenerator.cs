@@ -87,7 +87,11 @@ namespace Mvvm.CodeGen
             var access = AssemblyBuilderAccess.Run
 #endif
             var ab = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName), access);
+#if DEBUG
+            var mb = ab.DefineDynamicModule("generated", "{0}.mod.dll".FormatWith(assemblyName), true);
+#else
             var mb = ab.DefineDynamicModule("generated");
+#endif
             var tb = mb.DefineType("dbc_{0}".FormatWith(targetType.FullName), GeneratedTypeAttributes, null, new[] { targetType, typeof(INotifyPropertyChanged) });
 
             var constructor = tb.DefineConstructor(ConstructorAttributes, CallingConventions.HasThis, null);
