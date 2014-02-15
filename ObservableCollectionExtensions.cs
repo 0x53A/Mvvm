@@ -10,7 +10,7 @@ namespace Mvvm
 {
     public static class ObservableCollectionExtensions
     {
-        static void Swap<T>(this ObservableCollection<T> collection, int index1, int index2)
+        public static void Swap<T>(this ObservableCollection<T> collection, int index1, int index2)
         {
             Contract.Requires(index1 < collection.Count);
             Contract.Requires(index2 < collection.Count);

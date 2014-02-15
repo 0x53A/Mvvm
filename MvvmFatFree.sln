@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvvmFatFree", "MvvmFatFree.csproj", "{14CDF2D3-403E-4C4C-8718-990914680286}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MvvmFS", "..\MvvmFS\MvvmFS.fsproj", "{7A430855-4F18-4A82-B503-48C8941440BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvvmTests", "MvvmTests\MvvmTests.csproj", "{07C03C10-BE66-4FB4-AB59-AC76301E93FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{14CDF2D3-403E-4C4C-8718-990914680286}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14CDF2D3-403E-4C4C-8718-990914680286}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14CDF2D3-403E-4C4C-8718-990914680286}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A430855-4F18-4A82-B503-48C8941440BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A430855-4F18-4A82-B503-48C8941440BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A430855-4F18-4A82-B503-48C8941440BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A430855-4F18-4A82-B503-48C8941440BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07C03C10-BE66-4FB4-AB59-AC76301E93FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07C03C10-BE66-4FB4-AB59-AC76301E93FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07C03C10-BE66-4FB4-AB59-AC76301E93FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07C03C10-BE66-4FB4-AB59-AC76301E93FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
