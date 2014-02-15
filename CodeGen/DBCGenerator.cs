@@ -14,6 +14,14 @@ namespace Mvvm.CodeGen
     {
         static IDictionary<Type, Type> mappedTypes = new Dictionary<Type, Type>();
 
+        public static void ClearCache()
+        {
+            lock (mappedTypes)
+            {
+                mappedTypes.Clear();
+            }
+        }
+
         /// <summary>
         /// Constructs a new object of the Interface T,
         /// all get/set properties fire INotifyPropertyChanged.PropertyChanged
