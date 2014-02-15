@@ -71,9 +71,7 @@ namespace MvvmTests
                 var val = DBCGenerator.Generate<TestInterfaceLazyInvalid>();
                 Assert.Fail();
             }
-            catch
-            {
-            }
+            catch { }
         }
 
         [TestMethod]
@@ -84,9 +82,7 @@ namespace MvvmTests
                 var val = DBCGenerator.Generate<TestInterfaceInvalid>();
                 Assert.Fail();
             }
-            catch
-            {
-            }
+            catch { }
         }
     }
 }
