@@ -16,20 +16,25 @@ namespace Mvvm.CodeGen
 
         /// <summary>
         /// Constructs a new object of the Interface T,
-        /// with all properties implementing INotifyPropertyChanged
+        /// all get/set properties fire INotifyPropertyChanged.PropertyChanged
+        /// all get-only properties are lazy initialized
+        /// The Type is dynamically generated and cached
         /// </summary>
         /// <typeparam name="T">The Interface which should be implemented</typeparam>
         /// <returns>a newly constructed object</returns>
         public static T Generate<T>() where T : class
         {
-            //T must be an property-only interface
+            //T must be a property-only interface
             Contract.Requires(typeof(T).IsInterface);
             Contract.Requires(typeof(T).GetMembers().All(_ => _.MemberType == MemberTypes.Property));
+            //all get-only properties must have default constructors
+            Contract.Requires(typeof(T).GetProperties().Where(p => p.CanRead && !p.CanWrite).All(p => p.PropertyType.GetConstructor(Type.EmptyTypes) != null));
             //The returned value implements the interface INotifyPropertyChanged (but it is impossible to note that in the type system)
             Contract.Ensures(Contract.Result<T>() is INotifyPropertyChanged);
 
             Type targetType = typeof(T);
             Type mappedType;
+
             if (mappedTypes.ContainsKey(targetType))
                 mappedType = mappedTypes[targetType];
             else
