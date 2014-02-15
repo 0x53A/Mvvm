@@ -84,7 +84,7 @@ namespace Mvvm.CodeGen
 #if DEBUG
             var access = AssemblyBuilderAccess.RunAndSave;
 #else
-            var access = AssemblyBuilderAccess.Run
+            var access = AssemblyBuilderAccess.Run;
 #endif
             var ab = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName), access);
 #if DEBUG
