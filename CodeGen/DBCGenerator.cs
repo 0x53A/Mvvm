@@ -23,24 +23,31 @@ namespace Mvvm.CodeGen
         }
 
         /// <summary>
-        /// Constructs a new object of the Interface T,
-        /// all get/set properties fire INotifyPropertyChanged.PropertyChanged
-        /// all get-only properties are lazy initialized
-        /// The Type is dynamically generated and cached
+        /// See Generate
         /// </summary>
-        /// <typeparam name="T">The Interface which should be implemented</typeparam>
-        /// <returns>a newly constructed object</returns>
-        public static T Generate<T>(Action<T> initializer = null) where T : class
+        public static Type Map<T>()
         {
             //T must be a property-only interface
             Contract.Requires(typeof(T).IsInterface);
             Contract.Requires(typeof(T).GetMembers().All(_ => _.MemberType == MemberTypes.Property));
             //all get-only properties must have default constructors
             Contract.Requires(typeof(T).GetProperties().Where(p => p.CanRead && !p.CanWrite).All(p => p.PropertyType.GetConstructor(Type.EmptyTypes) != null));
-            //The returned value implements the interface INotifyPropertyChanged (but it is impossible to note that in the type system)
-            Contract.Ensures(Contract.Result<T>() is INotifyPropertyChanged);
-
+            
             Type targetType = typeof(T);
+            return Map(targetType);
+        }
+
+        /// <summary>
+        /// See Generate
+        /// </summary>
+        public static Type Map(Type targetType)
+        {
+            //T must be a property-only interface
+            Contract.Requires(targetType.IsInterface);
+            Contract.Requires(targetType.GetMembers().All(_ => _.MemberType == MemberTypes.Property));
+            //all get-only properties must have default constructors
+            Contract.Requires(targetType.GetProperties().Where(p => p.CanRead && !p.CanWrite).All(p => p.PropertyType.GetConstructor(Type.EmptyTypes) != null));
+
             Type mappedType;
 
             if (mappedTypes.ContainsKey(targetType))
@@ -56,14 +63,55 @@ namespace Mvvm.CodeGen
                     }
                     else
                     {
-                        mappedType = CreateType(targetType);
+                        mappedType = CreateInterfaceMap(targetType);
                         mappedTypes.Add(targetType, mappedType);
                     }
                 }
             }
+
+            return mappedType;
+
+        }
+
+        /// <summary>
+        /// Constructs a new object of the Interface T,
+        /// all get/set properties fire INotifyPropertyChanged.PropertyChanged
+        /// all get-only properties are lazy initialized
+        /// The Type is dynamically generated and cached, 
+        /// so subsequent calls do not need to construct a new type (which is potentially costly)
+        /// </summary>
+        /// <typeparam name="T">The Interface which should be implemented</typeparam>
+        /// <param name="initializer">optional: a function which initializes the newly constructed object</param>
+        /// <returns>a newly constructed object</returns>
+        public static T Generate<T>(Action<T> initializer = null) where T : class
+        {
+            //T must be a property-only interface
+            Contract.Requires(typeof(T).IsInterface);
+            Contract.Requires(typeof(T).GetMembers().All(_ => _.MemberType == MemberTypes.Property));
+            //all get-only properties must have default constructors
+            Contract.Requires(typeof(T).GetProperties().Where(p => p.CanRead && !p.CanWrite).All(p => p.PropertyType.GetConstructor(Type.EmptyTypes) != null));
+            //The returned value implements the interface INotifyPropertyChanged (but it is impossible to note that in the type system)
+            Contract.Ensures(Contract.Result<T>() is INotifyPropertyChanged);
+
+            var mappedType = Map<T>();
             var obj = (T)Activator.CreateInstance(mappedType);
             if (initializer != null)
                 initializer(obj);
+            return obj;
+        }
+
+        public static object Generate(Type targetType)
+        {
+            //T must be a property-only interface
+            Contract.Requires(targetType.IsInterface);
+            Contract.Requires(targetType.GetMembers().All(_ => _.MemberType == MemberTypes.Property));
+            //all get-only properties must have default constructors
+            Contract.Requires(targetType.GetProperties().Where(p => p.CanRead && !p.CanWrite).All(p => p.PropertyType.GetConstructor(Type.EmptyTypes) != null));
+            //The returned value implements the interface INotifyPropertyChanged (but it is impossible to note that in the type system)
+            Contract.Ensures(Contract.Result<object>() is INotifyPropertyChanged);
+
+            var mappedType = Map(targetType);
+            var obj = Activator.CreateInstance(mappedType);
             return obj;
         }
 
@@ -89,8 +137,14 @@ namespace Mvvm.CodeGen
         /// </summary>
         const MethodAttributes PrivateInstanceMethodAttributes = MethodAttributes.Private | MethodAttributes.HideBySig;
 
-        static Type CreateType(Type targetType, bool? dump = null)
+        static Type CreateInterfaceMap(Type targetType, bool? dump = null)
         {
+            //T must be a property-only interface
+            Contract.Requires(targetType.IsInterface);
+            Contract.Requires(targetType.GetMembers().All(_ => _.MemberType == MemberTypes.Property));
+            //all get-only properties must have default constructors
+            Contract.Requires(targetType.GetProperties().Where(p => p.CanRead && !p.CanWrite).All(p => p.PropertyType.GetConstructor(Type.EmptyTypes) != null));
+            
             if (!dump.HasValue)
             {
 #if DEBUG
@@ -259,6 +313,12 @@ namespace Mvvm.CodeGen
             ctor.Emit(OpCodes.Stfld, fb);
         }
 
+        /// <summary>
+        /// creates a get+set property in the specified type which implements INPC
+        /// </summary>
+        /// <param name="tb">the typebuilder to use</param>
+        /// <param name="property">the property which should be implemented</param>
+        /// <param name="raiseMethod">a Method wich has a single parameter of type string and no return value</param>
         static void CreateReadWriteProperty(TypeBuilder tb, PropertyInfo property, MethodBuilder raiseMethod)
         {
             var propertyName = property.Name;

@@ -32,25 +32,49 @@ namespace MvvmTests
         [TestMethod]
         public void TestCreationReadWrite()
         {
-            var val = DBCGenerator.Generate<TestInterfaceValid>();
-            Assert.IsNotNull(val);
-            Assert.IsTrue(val is INotifyPropertyChanged);
-            val.Asd1 = "Hello, World!";
-            Assert.IsTrue(val.Asd1 == "Hello, World!");
-            val.Asd2 = 55;
-            Assert.IsTrue(val.Asd2 == 55);
+            {
+                var val = DBCGenerator.Generate<TestInterfaceValid>();
+                Assert.IsNotNull(val);
+                Assert.IsTrue(val is INotifyPropertyChanged);
+                val.Asd1 = "Hello, World!";
+                Assert.IsTrue(val.Asd1 == "Hello, World!");
+                val.Asd2 = 55;
+                Assert.IsTrue(val.Asd2 == 55);
+            }
+
+            {
+                var val = (TestInterfaceValid)DBCGenerator.Generate(typeof(TestInterfaceValid));
+                Assert.IsNotNull(val);
+                Assert.IsTrue(val is INotifyPropertyChanged);
+                val.Asd1 = "Hello, World!";
+                Assert.IsTrue(val.Asd1 == "Hello, World!");
+                val.Asd2 = 55;
+                Assert.IsTrue(val.Asd2 == 55);
+            }
         }
 
         [TestMethod]
         public void TestCreationLazy()
         {
-            var val = DBCGenerator.Generate<TestInterfaceLazy>();
-            Assert.IsNotNull(val);
-            Assert.IsTrue(val is INotifyPropertyChanged);
-            Assert.IsTrue(val.FooBar != null);
-            Assert.IsTrue(val.BarFoo != null);
-            val.FooBar.Add(99);
-            val.BarFoo.Add("Hello, World!");
+            {
+                var val = DBCGenerator.Generate<TestInterfaceLazy>();
+                Assert.IsNotNull(val);
+                Assert.IsTrue(val is INotifyPropertyChanged);
+                Assert.IsTrue(val.FooBar != null);
+                Assert.IsTrue(val.BarFoo != null);
+                val.FooBar.Add(99);
+                val.BarFoo.Add("Hello, World!");
+            }
+
+            {
+                var val =(TestInterfaceLazy) DBCGenerator.Generate(typeof(TestInterfaceLazy));
+                Assert.IsNotNull(val);
+                Assert.IsTrue(val is INotifyPropertyChanged);
+                Assert.IsTrue(val.FooBar != null);
+                Assert.IsTrue(val.BarFoo != null);
+                val.FooBar.Add(99);
+                val.BarFoo.Add("Hello, World!");
+            }
         }
 
         /* Test Failure */

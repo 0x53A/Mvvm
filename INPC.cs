@@ -8,6 +8,15 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
+/* These classes enable a safe way to interact with INotifyPropertyChanged.
+ * The goal is to eliminate all uses of hardcoded strings.
+ * In some cases, all generic types can be inferred.
+ * These methods are in the non-generic INPC class.
+ * In other cases, the type of the source object must be supplied.
+ * These methods are in INPC<T>.
+ * 
+ * */
+
 namespace Mvvm
 {
     public static class INPC
@@ -38,6 +47,33 @@ namespace Mvvm
         public static void Unsubscribe<TSource, TProperty>(TSource source, Action<TSource, TProperty> callback)
         {
             //TODO
+        }
+    }
+
+    public static class INPC<TSource>
+    {
+        internal static string ExtractMemberName<TProperty>(Expression<Func<TSource, TProperty>> expression)
+        {
+            Contract.Requires(expression.Body.NodeType == ExpressionType.MemberAccess);
+            Contract.Requires(expression.Body is MemberExpression);
+            Contract.Requires((expression.Body as MemberExpression).Member.MemberType == MemberTypes.Property);
+
+            var exp = expression.Body as MemberExpression;
+            var prop = exp.Member as PropertyInfo;
+            var name = prop.Name;
+            return name;
+        }
+
+        /// <summary>
+        /// To be used in the INotifyPropertyChanged Callback to check, whether the changed Property is a specific one
+        /// </summary>
+        public static bool Is<TProperty>(Expression<Func<TSource, TProperty>> expression, string toMatch)
+        {
+            Contract.Requires(expression.Body.NodeType == ExpressionType.MemberAccess);
+            Contract.Requires(expression.Body is MemberExpression);
+            Contract.Requires((expression.Body as MemberExpression).Member.MemberType == MemberTypes.Property);
+
+            return INPC<TSource>.ExtractMemberName(expression) == toMatch;
         }
     }
 }

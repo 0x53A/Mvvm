@@ -15,7 +15,7 @@ namespace MvvmTests
         }
 
         [TestMethod]
-        public void TestMethod1()
+        public void TestSubscribe()
         {
             int nFoo = 0;
             int nBar = 0;
@@ -38,6 +38,16 @@ namespace MvvmTests
             Assert.AreEqual(nBar, 2);
             obj.Bar = 103;
             Assert.AreEqual(nBar, 3);
+        }
+
+        [TestMethod]
+        public void TestIs()
+        {
+            Assert.IsTrue(INPC<IASD>.Is(_ => _.Foo, "Foo"));
+            Assert.IsFalse(INPC<IASD>.Is(_ => _.Foo, "Bar"));
+
+            Assert.IsTrue(INPC<IASD>.Is(_ => _.Bar, "Bar"));
+            Assert.IsFalse(INPC<IASD>.Is(_ => _.Bar, "Foo"));
         }
     }
 }
