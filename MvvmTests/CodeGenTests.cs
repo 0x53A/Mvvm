@@ -29,18 +29,6 @@ namespace MvvmTests
             List<string> BarFoo { get; }
         }
 
-        public interface TestInterfaceLazyInvalid
-        {
-            ClassWithoutStandardConstructor Foo { get; }
-        }
-
-        public interface TestInterfaceInvalid
-        {
-            void Foo();
-            string Asd1 { get; set; }
-            int Asd2 { get; set; }
-        }
-
         [TestMethod]
         public void TestCreationReadWrite()
         {
@@ -49,6 +37,8 @@ namespace MvvmTests
             Assert.IsTrue(val is INotifyPropertyChanged);
             val.Asd1 = "Hello, World!";
             Assert.IsTrue(val.Asd1 == "Hello, World!");
+            val.Asd2 = 55;
+            Assert.IsTrue(val.Asd2 == 55);
         }
 
         [TestMethod]
@@ -61,6 +51,20 @@ namespace MvvmTests
             Assert.IsTrue(val.BarFoo != null);
             val.FooBar.Add(99);
             val.BarFoo.Add("Hello, World!");
+        }
+
+        /* Test Failure */
+
+        public interface TestInterfaceLazyInvalid
+        {
+            ClassWithoutStandardConstructor Foo { get; }
+        }
+
+        public interface TestInterfaceInvalid
+        {
+            void Foo();
+            string Asd1 { get; set; }
+            int Asd2 { get; set; }
         }
 
         [TestMethod]

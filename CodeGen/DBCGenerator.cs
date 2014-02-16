@@ -30,7 +30,7 @@ namespace Mvvm.CodeGen
         /// </summary>
         /// <typeparam name="T">The Interface which should be implemented</typeparam>
         /// <returns>a newly constructed object</returns>
-        public static T Generate<T>() where T : class
+        public static T Generate<T>(Action<T> initializer = null) where T : class
         {
             //T must be a property-only interface
             Contract.Requires(typeof(T).IsInterface);
@@ -61,7 +61,10 @@ namespace Mvvm.CodeGen
                     }
                 }
             }
-            return (T)Activator.CreateInstance(mappedType);
+            var obj = (T)Activator.CreateInstance(mappedType);
+            if (initializer != null)
+                initializer(obj);
+            return obj;
         }
 
         /// <summary>
@@ -86,20 +89,27 @@ namespace Mvvm.CodeGen
         /// </summary>
         const MethodAttributes PrivateInstanceMethodAttributes = MethodAttributes.Private | MethodAttributes.HideBySig;
 
-        static Type CreateType(Type targetType)
+        static Type CreateType(Type targetType, bool? dump = null)
         {
+            if (!dump.HasValue)
+            {
+#if DEBUG
+                dump = true;
+#else
+                dump = false;
+#endif
+            }
+
+            var access = (dump == true) ? AssemblyBuilderAccess.RunAndSave : AssemblyBuilderAccess.Run;
             var assemblyName = "assembly_{0}_{1}".FormatWith(targetType.FullName, Guid.NewGuid());
-#if DEBUG
-            var access = AssemblyBuilderAccess.RunAndSave;
-#else
-            var access = AssemblyBuilderAccess.Run;
-#endif
             var ab = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName), access);
-#if DEBUG
-            var mb = ab.DefineDynamicModule("generated", "{0}.mod.dll".FormatWith(assemblyName), true);
-#else
-            var mb = ab.DefineDynamicModule("generated");
-#endif
+
+            ModuleBuilder mb;
+            if (dump == true)
+                mb = ab.DefineDynamicModule("generated", "{0}.mod.dll".FormatWith(assemblyName), true);
+            else
+                mb = ab.DefineDynamicModule("generated");
+
             var tb = mb.DefineType("dbc_{0}".FormatWith(targetType.FullName), GeneratedTypeAttributes, null, new[] { targetType, typeof(INotifyPropertyChanged) });
 
             var constructor = tb.DefineConstructor(ConstructorAttributes, CallingConventions.HasThis, null);
@@ -110,7 +120,7 @@ namespace Mvvm.CodeGen
             foreach (var property in targetType.GetProperties())
             {
                 if (property.CanRead && property.CanWrite)
-                    CreateReadWriteProperty(tb, property);
+                    CreateReadWriteProperty(tb, property, raiseMethod);
                 else if (property.CanRead)
                     CreateReadOnlyLazyProperty(tb, property, ctorIL);
             }
@@ -123,9 +133,10 @@ namespace Mvvm.CodeGen
 
             //create and return type
             var type = tb.CreateType();
-#if DEBUG
-            ab.Save("{0}.dll".FormatWith(assemblyName));
-#endif
+
+            if (dump == true)
+                ab.Save("{0}.dll".FormatWith(assemblyName));
+
             return type;
         }
 
@@ -248,10 +259,11 @@ namespace Mvvm.CodeGen
             ctor.Emit(OpCodes.Stfld, fb);
         }
 
-        static void CreateReadWriteProperty(TypeBuilder tb, PropertyInfo property)
+        static void CreateReadWriteProperty(TypeBuilder tb, PropertyInfo property, MethodBuilder raiseMethod)
         {
             var propertyName = property.Name;
             var propertyType = property.PropertyType;
+            var isValueType = propertyType.IsValueType;
 
             //backing
             var fb = tb.DefineField("_backing_" + propertyName, propertyType, FieldAttributes.Private);
@@ -271,9 +283,31 @@ namespace Mvvm.CodeGen
             var setMethod = tb.DefineMethod("set_" + propertyName, InterfaceImplementationAttributes, null, new[] { propertyType });
 
             var setIL = setMethod.GetILGenerator();
+            setIL.DeclareLocal(typeof(bool));
+            var lExit = setIL.DefineLabel();
+            var lAssignment = setIL.DefineLabel();
+            setIL.Emit(OpCodes.Nop);
+            setIL.Emit(OpCodes.Ldarg_0);
+            setIL.Emit(OpCodes.Ldfld, fb);
+            if (isValueType) setIL.Emit(OpCodes.Box, propertyType);
+            setIL.Emit(OpCodes.Ldarg_1);
+            if (isValueType) setIL.Emit(OpCodes.Box, propertyType);
+            setIL.EmitCall(OpCodes.Call, CodeGenHelper.GetMethod((Func<object,object,bool>)Object.Equals), null);
+            setIL.Emit(OpCodes.Ldc_I4_0);
+            setIL.Emit(OpCodes.Ceq);
+            setIL.Emit(OpCodes.Stloc_0);
+            setIL.Emit(OpCodes.Ldloc_0);
+            setIL.Emit(OpCodes.Brtrue_S, lAssignment);
+            setIL.Emit(OpCodes.Br_S, lExit);
+            setIL.MarkLabel(lAssignment);
             setIL.Emit(OpCodes.Ldarg_0);
             setIL.Emit(OpCodes.Ldarg_1);
             setIL.Emit(OpCodes.Stfld, fb);
+            setIL.Emit(OpCodes.Ldarg_0);
+            setIL.Emit(OpCodes.Ldstr, propertyName);
+            setIL.EmitCall(OpCodes.Call, raiseMethod, null);
+            setIL.Emit(OpCodes.Nop);
+            setIL.MarkLabel(lExit);
             setIL.Emit(OpCodes.Ret);
 
             //combine property, getter, setter 
