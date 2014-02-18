@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -51,6 +53,12 @@ namespace Mvvm.CodeGen
         /// </summary>
         internal const MethodAttributes PrivateInstanceMethodAttributes = MethodAttributes.Private | MethodAttributes.HideBySig;
 
+        /// <summary>
+        /// the Attributes for a normal, nonvirtual instance method
+        /// </summary>
+        internal const MethodAttributes PrivateStaticMethodAttributes = MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.Static;
+
+
         #region INotifyPropertyChanged
 
         /// <summary>
@@ -60,60 +68,243 @@ namespace Mvvm.CodeGen
         /// <param name="tb"></param>
         /// <param name="full">whether the full INPC (event,delegate,add,remove) should be implemented or only the raise-method</param>
         /// <returns>MethodBuilder for the raise-method</returns>
-        internal static MethodInfo ImplementINPC(TypeBuilder tb, bool full = true)
+        internal static MethodInfo ImplementInpcFull(TypeBuilder tb)
         {
-            if (full)
-            {
-                var eventField = CreatePropertyChangedEvent(tb);
-                var raiseMethod = CreateRaisePropertyChanged(tb, eventField);
-                return raiseMethod;
-            }
-            else
-            {
-                throw new NotImplementedException();
-                //TODO: implement
-                var raiseMethod = CreateBaseRaise(tb);
-                return raiseMethod;
-            }
+            var eventField = CreatePropertyChangedEvent(tb);
+            var raiseMethod = CreateRaisePropertyChanged(tb, eventField);
+            return raiseMethod;
         }
 
-        private static MethodBuilder CreateBaseRaise(TypeBuilder typeBuilder)
+        internal static MethodBuilder ImplementBaseRaise(TypeBuilder typeBuilder)
         {
+            //var dummyRaiseBasePropertyChanged = typeBuilder.DefineMethod("RaiseBasePropertyChanged", PrivateStaticMethodAttributes, null, new Type[] { typeof(object), typeof(string) });
+            //var ilRaise = dummyRaiseBasePropertyChanged.GetILGenerator();
+            /***************/
+            // Declaring method builder
+            // Method attributes
+            System.Reflection.MethodAttributes methodAttributes =
+                  System.Reflection.MethodAttributes.Private
+                | System.Reflection.MethodAttributes.HideBySig
+                | System.Reflection.MethodAttributes.Static;
+            MethodBuilder method = typeBuilder.DefineMethod("RaiseBasePropertyChanged", methodAttributes);
+            // Preparing Reflection instances
+            MethodInfo method1 = typeof(Object).GetMethod(
+                "GetType",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new Type[]{
+            },
+                null
+                );
+            MethodInfo method2 = typeof(Type).GetMethod(
+                "get_BaseType",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new Type[]{
+            },
+                null
+                );
+            MethodInfo method3 = typeof(Type).GetMethod(
+                "GetField",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new Type[]{
+            typeof(String),
+            typeof(BindingFlags)
+            },
+                null
+                );
+            MethodInfo method4 = typeof(FieldInfo).GetMethod(
+                "op_Equality",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new Type[]{
+            typeof(FieldInfo),
+            typeof(FieldInfo)
+            },
+                null
+                );
+            MethodInfo method5 = typeof(Type).GetMethod(
+                "GetTypeFromHandle",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new Type[]{
+            typeof(RuntimeTypeHandle)
+            },
+                null
+                );
+            MethodInfo method6 = typeof(Type).GetMethod(
+                "op_Inequality",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new Type[]{
+            typeof(Type),
+            typeof(Type)
+            },
+                null
+                );
+            ConstructorInfo ctor7 = typeof(InvalidOperationException).GetConstructor(
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new Type[]{
+            typeof(String)
+            },
+                null
+                );
+            MethodInfo method8 = typeof(FieldInfo).GetMethod(
+                "GetValue",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new Type[]{
+            typeof(Object)
+            },
+                null
+                );
+            ConstructorInfo ctor9 = typeof(PropertyChangedEventArgs).GetConstructor(
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new Type[]{
+            typeof(String)
+            },
+                null
+                );
+            MethodInfo method10 = typeof(PropertyChangedEventHandler).GetMethod(
+                "Invoke",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new Type[]{
+            typeof(Object),
+            typeof(PropertyChangedEventArgs)
+            },
+                null
+                );
+            // Setting return type
+            method.SetReturnType(typeof(void));
+            // Adding parameters
+            method.SetParameters(
+                typeof(Object),
+                typeof(String)
+                );
+            // Parameter self
+            ParameterBuilder self = method.DefineParameter(1, ParameterAttributes.None, "self");
+            // Parameter property
+            ParameterBuilder property = method.DefineParameter(2, ParameterAttributes.None, "property");
+            ILGenerator gen = method.GetILGenerator();
+            // Preparing locals
+            LocalBuilder type = gen.DeclareLocal(typeof(Type));
+            LocalBuilder info = gen.DeclareLocal(typeof(FieldInfo));
+            LocalBuilder handler = gen.DeclareLocal(typeof(PropertyChangedEventHandler));
+            // Preparing labels
+            Label label46 = gen.DefineLabel();
+            Label label64 = gen.DefineLabel();
+            Label label16 = gen.DefineLabel();
+            Label label84 = gen.DefineLabel();
+            // Writing body
+            gen.Emit(OpCodes.Ldarg_0);
+            gen.Emit(OpCodes.Callvirt, method1);
+            gen.Emit(OpCodes.Callvirt, method2);
+            gen.Emit(OpCodes.Stloc_0);
+            gen.Emit(OpCodes.Ldnull);
+            gen.Emit(OpCodes.Stloc_1);
+            gen.Emit(OpCodes.Br_S, label46);
+            gen.MarkLabel(label16);
+            gen.Emit(OpCodes.Ldloc_0);
+            gen.Emit(OpCodes.Ldstr, "PropertyChanged");
+            gen.Emit(OpCodes.Ldc_I4_S, 36);
+            gen.Emit(OpCodes.Callvirt, method3);
+            gen.Emit(OpCodes.Stloc_1);
+            gen.Emit(OpCodes.Ldloc_1);
+            gen.Emit(OpCodes.Ldnull);
+            gen.Emit(OpCodes.Call, method4);
+            gen.Emit(OpCodes.Brfalse_S, label64);
+            gen.Emit(OpCodes.Ldloc_0);
+            gen.Emit(OpCodes.Callvirt, method2);
+            gen.Emit(OpCodes.Stloc_0);
+            gen.MarkLabel(label46);
+            gen.Emit(OpCodes.Ldloc_0);
+            gen.Emit(OpCodes.Ldtoken, typeof(Object));
+            gen.Emit(OpCodes.Call, method5);
+            gen.Emit(OpCodes.Call, method6);
+            gen.Emit(OpCodes.Brtrue_S, label16);
+            gen.MarkLabel(label64);
+            gen.Emit(OpCodes.Ldloc_1);
+            gen.Emit(OpCodes.Ldnull);
+            gen.Emit(OpCodes.Call, method4);
+            gen.Emit(OpCodes.Brfalse_S, label84);
+            gen.Emit(OpCodes.Ldstr, "Could not find the event field");
+            gen.Emit(OpCodes.Newobj, ctor7);
+            gen.Emit(OpCodes.Throw);
+            gen.MarkLabel(label84);
+            gen.Emit(OpCodes.Ldloc_1);
+            gen.Emit(OpCodes.Ldarg_0);
+            gen.Emit(OpCodes.Callvirt, method8);
+            gen.Emit(OpCodes.Castclass, typeof(PropertyChangedEventHandler));
+            gen.Emit(OpCodes.Stloc_2);
+            gen.Emit(OpCodes.Ldloc_2);
+            gen.Emit(OpCodes.Ldarg_0);
+            gen.Emit(OpCodes.Ldarg_1);
+            gen.Emit(OpCodes.Newobj, ctor9);
+            gen.Emit(OpCodes.Callvirt, method10);
+            gen.Emit(OpCodes.Ret);
+            // finished
+            return method;
 
-            MethodBuilder raisePropertyChangedBuilder = typeBuilder.DefineMethod("RaiseBasePropertyChanged", PrivateInstanceMethodAttributes, null, new Type[] { typeof(string) });
-
-            ILGenerator il = raisePropertyChangedBuilder.GetILGenerator();
-            //TODO: implement
-            il.Emit(OpCodes.Ret);
-
-            return raisePropertyChangedBuilder;
+            /***************/
+            //return dummyRaiseBasePropertyChanged;
         }
+
+        //private static void Swap(Type type, MethodBuilder dummy, MethodInfo replacement)
+        //{
+        //    var body = replacement.GetMethodBody();
+        //    var bytesBody = body.GetILAsByteArray();
+        //    var ms = new MemoryStream();
+        //    byte flag = 0x03;
+        //    if (body.InitLocals)
+        //        flag |= 0x10;
+        //    if (body.ExceptionHandlingClauses.Any())
+        //        flag |= 0x08;
+        //    ms.WriteByte(flag);
+        //    ms.WriteByte(0x30);
+        //    ms.Write(BitConverter.GetBytes((short)body.MaxStackSize));
+        //    ms.Write(BitConverter.GetBytes((Int32)bytesBody.Length));
+        //    ms.Write(BitConverter.GetBytes((Int32)body.LocalSignatureMetadataToken));            
+        //    ms.Write(bytesBody);
+        //    var blob = ms.ToArray();
+        //    var handle = GCHandle.Alloc(blob, GCHandleType.Pinned);
+        //    var ptr = handle.AddrOfPinnedObject();
+        //    MethodRental.SwapMethodBody(type, dummy.GetToken().Token, ptr, blob.Length, MethodRental.JitImmediate);
+        //    handle.Free();
+        //}
+
+        //internal static void SwapDummies(Type type, MethodBuilder dummyfindEventField, MethodBuilder dummyRaiseBasePropertyChanged)
+        //{
+        //    var methodRaise = CodeGenHelper.GetMethod((Action<object, string>)RaiseBasePropertyChanged);
+        //    Swap(type, dummyRaiseBasePropertyChanged, methodRaise);
+        //}
 
         /************************************************************************/
         /* This needs to be implemented inside the dynamic class*****************/
         /************************************************************************/
-
-        private FieldInfo FindEventField(Type type)
+        
+        private static void RaiseBasePropertyChanged(object self, string property)
         {
-            var field = type.GetField("PropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (field == null)
+            var type = self.GetType().BaseType;
+            FieldInfo eventField = null;
+            while (type != typeof(object))
             {
-                if (type.BaseType != typeof(object))
-                    return FindEventField(type.BaseType);
+                eventField = type.GetField("PropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (eventField == null)
+                {
+                    type = type.BaseType;
+                    continue;
+                }
                 else
-                    throw new Exception();
+                    break;
             }
-            else
-                return field;
-        }
-
-        private void RaiseBasePropertyChanged(string property)
-        {
-            var eventField = FindEventField(this.GetType());
             if (eventField == null)
-                throw new InvalidOperationException("could not found the event field of the base class");
-            var eventFieldValue = (PropertyChangedEventHandler)eventField.GetValue(this);
-            eventFieldValue.Invoke(this, new PropertyChangedEventArgs(property));
+                throw new InvalidOperationException("Could not find the event field");
+            var eventFieldValue = (PropertyChangedEventHandler)eventField.GetValue(self);
+            eventFieldValue.Invoke(self, new PropertyChangedEventArgs(property));
         }
 
         /************************************************************************/

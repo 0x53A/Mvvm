@@ -128,11 +128,19 @@ namespace Mvvm.CodeGen
             var constructor = tb.DefineConstructor(CodeGenInternal.ConstructorAttributes, CallingConventions.HasThis, null);
             var ctorIL = constructor.GetILGenerator();
 
-            var raiseMethod = CodeGenInternal.ImplementINPC(tb, !hasINPC);
+            MethodInfo raiseMethod;
+            if (hasINPC)
+            {
+                raiseMethod = CodeGenInternal.ImplementBaseRaise(tb);
+            }
+            else
+            {
+                raiseMethod = CodeGenInternal.ImplementInpcFull(tb);
+            }
 
             foreach (var property in targetType.GetProperties())
             {
-                if (property.CanRead && property.CanWrite && property.CustomAttributes.Any(a=>a.AttributeType==typeof(InpcAttribute)))
+                if (property.CanRead && property.CanWrite && property.CustomAttributes.Any(a => a.AttributeType == typeof(InpcAttribute)))
                     CodeGenInternal.CreateReadWriteProperty(tb, property, raiseMethod, false);
                 else if (property.CanRead && !property.CanWrite && property.CustomAttributes.Any(a => a.AttributeType == typeof(LazyAttribute)))
                     CodeGenInternal.CreateReadOnlyLazyProperty(tb, property, ctorIL, false);
@@ -146,6 +154,12 @@ namespace Mvvm.CodeGen
 
             //create and return type
             var type = tb.CreateType();
+
+            //swap bodies
+            //if (hasINPC)
+            //{
+            //    CodeGenInternal.SwapDummies(type, dummyfindEventField, dummyRaiseBasePropertyChanged);
+            //}
 
             if (dump == true)
                 ab.Save("{0}.dll".FormatWith(assemblyName));

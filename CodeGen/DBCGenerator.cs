@@ -149,7 +149,7 @@ namespace Mvvm.CodeGen
             var constructor = tb.DefineConstructor(CodeGenInternal.ConstructorAttributes, CallingConventions.HasThis, null);
             var ctorIL = constructor.GetILGenerator();
 
-            var raiseMethod = CodeGenInternal.ImplementINPC(tb);
+            var raiseMethod = CodeGenInternal.ImplementInpcFull(tb);
 
             foreach (var property in targetType.GetProperties())
             {
