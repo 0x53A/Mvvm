@@ -20,9 +20,9 @@ namespace Mvvm
         }
     }
 
-    public class EventTriggerCommand<T_EV, T_P> : EventTriggerCommand
+    public class EventTriggerCommand<TEvent, TProperty> : EventTriggerCommand
     {
-        public EventTriggerCommand(Action<T_EV, T_P> execute) : base((a,b)=>execute((T_EV)a, (T_P)b))
+        public EventTriggerCommand(Action<TEvent, TProperty> execute) : base((a,b)=>execute((TEvent)a, (TProperty)b))
         {
 
         }

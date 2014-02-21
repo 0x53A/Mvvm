@@ -19,6 +19,20 @@ using System.Threading.Tasks;
 
 namespace Mvvm
 {
+    public class OnPropertyChanged<TSource>
+    {
+        string _prop;
+        public OnPropertyChanged(string propertyName)
+        {
+            _prop = propertyName;
+        }
+
+        public bool Is<TProp>(Expression<Func<TSource, TProp>> expr)
+        {
+            return INPC<TSource>.Is<TProp>(expr, _prop);
+        }
+    }
+
     public static class INPC
     {
         /// <summary>
@@ -43,6 +57,23 @@ namespace Mvvm
             var inpc = source as INotifyPropertyChanged;
             inpc.PropertyChanged += (a, b) => { if (b.PropertyName == prop.Name) callback((TSource)a, (TProperty)getter.Invoke(a, null)); };
         }
+
+        //public static void Subscribe<TSource, TProperty>(TSource source, Expression<Func<TSource, TProperty>> expression, Func<TSource, TProperty, Task> callback)
+        //{
+        //    Subscribe<TSource, TProperty>(source, expression, (a, b) => callback(a, b).Wait());
+        //}
+
+        public static void SubscribeAll<TSource>(TSource source, Action<TSource, OnPropertyChanged<TSource>> callback)
+        {
+            var inpc = source as INotifyPropertyChanged;
+            inpc.PropertyChanged += (a, b) => callback((TSource)a, new OnPropertyChanged<TSource>(b.PropertyName));
+        }
+
+        //public static void SubscribeAll<TSource>(TSource source, Func<TSource, OnPropertyChanged<TSource>, Task> callback)
+        //{
+        //    var inpc = source as INotifyPropertyChanged;
+        //    inpc.PropertyChanged += (a, b) => callback((TSource)a, new OnPropertyChanged<TSource>(b.PropertyName)).Wait();
+        //}
 
         public static void Unsubscribe<TSource, TProperty>(TSource source, Action<TSource, TProperty> callback)
         {
