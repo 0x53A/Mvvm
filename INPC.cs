@@ -22,6 +22,7 @@ namespace Mvvm
     public class OnPropertyChanged<TSource>
     {
         string _prop;
+
         public OnPropertyChanged(string propertyName)
         {
             _prop = propertyName;
@@ -30,6 +31,148 @@ namespace Mvvm
         public bool Is<TProp>(Expression<Func<TSource, TProp>> expr)
         {
             return INPC<TSource>.Is<TProp>(expr, _prop);
+        }
+
+        public string PropertyName { get { return _prop; } }
+    }
+
+    public enum BindingMode { SourceToDestination, DestinationToSource, TwoWay }
+
+
+    /// <summary>
+    /// Enables Binding between two objects which implement INPC
+    /// </summary>
+    public class INPCBinding<TSource, TDestination, TProperty>
+    {
+        object source;
+        object destination;
+
+        List<MemberInfo> stepsSource = new List<MemberInfo>();
+        List<MemberInfo> stepsDestination = new List<MemberInfo>();
+        List<Tuple<INotifyPropertyChanged, PropertyChangedEventHandler>> subscribedSource = new List<Tuple<INotifyPropertyChanged,PropertyChangedEventHandler>>();
+        List<Tuple<INotifyPropertyChanged, PropertyChangedEventHandler>> subscribedDestination = new List<Tuple<INotifyPropertyChanged,PropertyChangedEventHandler>>();
+        BindingMode mode;
+
+        public INPCBinding(TSource source, Expression<Func<TSource, TProperty>> sourceSelector,
+   TDestination destination, Expression<Func<TDestination, TProperty>> destinationSelector,
+   BindingMode mode)
+        {
+            this.mode = mode;
+            this.source = source;
+            this.destination = destination;
+
+            RecursiveScan(sourceSelector.Body as MemberExpression, stepsSource);
+            RecursiveScan(destinationSelector.Body as MemberExpression, stepsDestination);
+
+            if (mode == BindingMode.SourceToDestination || mode == BindingMode.TwoWay)
+                Bind(true);
+            if (mode == BindingMode.DestinationToSource || mode == BindingMode.TwoWay)
+                Bind(false);
+
+            if (mode == BindingMode.SourceToDestination || mode == BindingMode.TwoWay)
+                SetIfDifferent(true);
+            else
+                SetIfDifferent(false);
+        }
+
+        void RecursiveScan(MemberExpression exp, List<MemberInfo> list)
+        {
+            if (exp is MemberExpression)
+            {
+                RecursiveScan(exp.Expression as MemberExpression, list);
+                list.Add(exp.Member);
+            }
+        }
+
+        public void Unbind()
+        {
+            Unbind(true);
+            Unbind(false);
+        }
+
+        void Unbind(bool isFromSource)
+        {
+            if (isFromSource)
+            {
+                foreach (var x in subscribedSource)
+                    x.Item1.PropertyChanged -= x.Item2;
+            }
+            else
+            {
+                foreach (var x in subscribedDestination)
+                    x.Item1.PropertyChanged -= x.Item2;
+            }
+        }
+
+        void Bind(bool isSource)
+        {
+            object current = isSource ? source : destination;
+            var list = isSource ? stepsSource : stepsDestination;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                var o = list[i];
+                if (current is INotifyPropertyChanged)
+                {
+                    var tuple = Tuple.Create<INotifyPropertyChanged, PropertyChangedEventHandler>(current as INotifyPropertyChanged, (a, b) =>
+                    {
+                        if (b.PropertyName == o.Name)
+                        {
+                            if (i == list.Count - 1)
+                            {
+                                SetIfDifferent(isSource);
+                            }
+                            else
+                            {
+                                Unbind(isSource);
+                                Bind(isSource);
+                                SetIfDifferent(isSource);
+                            }
+                        }
+                    });
+                    (current as INotifyPropertyChanged).PropertyChanged += tuple.Item2;
+                    if (isSource)
+                        subscribedSource.Add(tuple);
+                    else
+                        subscribedDestination.Add(tuple);
+                }
+                current = Get(o, current);
+            }
+        }
+
+        object Get(MemberInfo info, object o)
+        {
+            if (info is FieldInfo)
+                return (info as FieldInfo).GetValue(o);
+            else if (info is PropertyInfo)
+                return (info as PropertyInfo).GetValue(o);
+            else
+                throw new InvalidOperationException();
+        }
+
+        void SetIfDifferent(bool isSourceToDestination)
+        {
+            var sObj = source;
+            var dObj = destination;
+
+            for (int i = 0; i < stepsSource.Count - 1; i++)
+                sObj = Get(stepsSource[i], sObj);
+            for (int i = 0; i < stepsDestination.Count - 1; i++)
+                dObj = Get(stepsDestination[i], dObj);
+
+            var sProp = stepsSource.Last();
+            var dProp = stepsDestination.Last();
+
+            var sVal = Get(sProp, sObj);
+            var dVal = Get(dProp, dObj);
+
+            if (sVal != dVal)
+            {
+                if (isSourceToDestination)
+                    (dProp as PropertyInfo).SetValue(dObj, sVal);
+                else
+                    (sProp as PropertyInfo).SetValue(sObj, dVal);
+            }
         }
     }
 
@@ -49,6 +192,7 @@ namespace Mvvm
             Contract.Requires(expression.Body.NodeType == ExpressionType.MemberAccess);
             Contract.Requires(expression.Body is MemberExpression);
             Contract.Requires((expression.Body as MemberExpression).Member.MemberType == MemberTypes.Property);
+            Contract.Requires((expression.Body as MemberExpression).Expression is ParameterExpression);
             Contract.Requires(source is INotifyPropertyChanged);
 
             var exp = expression.Body as MemberExpression;
@@ -78,6 +222,13 @@ namespace Mvvm
         public static void Unsubscribe<TSource, TProperty>(TSource source, Action<TSource, TProperty> callback)
         {
             //TODO
+        }
+        public static INPCBinding<TSource, TDestination, TProperty> Bind<TSource, TDestination, TProperty>
+            (TSource source, Expression<Func<TSource, TProperty>> sourceSelector,
+            TDestination destination, Expression<Func<TDestination, TProperty>> destinationSelector,
+            BindingMode mode)
+        {
+            return new INPCBinding<TSource, TDestination, TProperty>(source, sourceSelector, destination, destinationSelector, mode);
         }
     }
 
