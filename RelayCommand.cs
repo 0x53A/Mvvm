@@ -47,6 +47,7 @@ namespace Mvvm
         }
     }
 
+    //TODO: clean up implementation without changing the interface
     public class RelayCommand<T> : RelayCommand
     {
         public RelayCommand(Action<T> execute, Func<T,bool> canExecute) : base((o)=>execute((T)o), (o)=>canExecute((T)o))

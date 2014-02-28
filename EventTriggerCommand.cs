@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Mvvm
 {
+    //TODO: clean up implementation without changing the interface
     public class EventTriggerCommand : RelayCommand, IEventTriggerCommand
     {
         Action<object, object> _execute;

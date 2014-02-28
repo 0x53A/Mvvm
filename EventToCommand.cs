@@ -9,6 +9,7 @@ using System.Windows.Interactivity;
 
 namespace Mvvm
 {
+    //TODO: clean up implementation without changing the interface
     public class EventToCommand : TriggerAction<DependencyObject>
     {
         public static readonly DependencyProperty CommandProperty = DependencyProperty.Register("Command", typeof(ICommand), typeof(EventToCommand));

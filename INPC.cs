@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mvvm.CodeGen;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
@@ -49,8 +50,8 @@ namespace Mvvm
 
         List<MemberInfo> stepsSource = new List<MemberInfo>();
         List<MemberInfo> stepsDestination = new List<MemberInfo>();
-        List<Tuple<INotifyPropertyChanged, PropertyChangedEventHandler>> subscribedSource = new List<Tuple<INotifyPropertyChanged,PropertyChangedEventHandler>>();
-        List<Tuple<INotifyPropertyChanged, PropertyChangedEventHandler>> subscribedDestination = new List<Tuple<INotifyPropertyChanged,PropertyChangedEventHandler>>();
+        List<Tuple<INotifyPropertyChanged, PropertyChangedEventHandler>> subscribedSource = new List<Tuple<INotifyPropertyChanged, PropertyChangedEventHandler>>();
+        List<Tuple<INotifyPropertyChanged, PropertyChangedEventHandler>> subscribedDestination = new List<Tuple<INotifyPropertyChanged, PropertyChangedEventHandler>>();
         BindingMode mode;
 
         public INPCBinding(TSource source, Expression<Func<TSource, TProperty>> sourceSelector,
@@ -178,6 +179,14 @@ namespace Mvvm
 
     public static class INPC
     {
+        public static T Wrap<T>(Action<T> initializer = null) where T : class
+        {
+            if (typeof(T).IsInterface)
+                return DBCGenerator.Generate<T>(initializer);
+            else
+                return VMWrapper.Wrap<T>(initializer);
+        }
+
         /// <summary>
         /// Enables a typesafe and refactorsafe way to subscribe to a INotifyPropertyChanged event.      
         /// </summary>
