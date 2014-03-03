@@ -36,6 +36,11 @@ namespace Mvvm
     /// </summary>
     public static class  IEnumerableExtensions
     {
+        public static IEnumerable<T> Flatten<T>(this IEnumerable<T> source, Func<T, IEnumerable<T>> extractChildNodes)
+        {
+
+        }
+
         private class EqualityComparer<T> : IEqualityComparer<T>
         {
             Func<T, T, bool> _comparisonFunc;
