@@ -18,7 +18,7 @@ namespace Mvvm
             stream.Write(buffer, 0, buffer.Length);
         }
     }
-    
+
     /// <summary>
     /// Extensions to IList
     /// </summary>
@@ -34,11 +34,21 @@ namespace Mvvm
     /// <summary>
     /// Extensions to IEnumerable
     /// </summary>
-    public static class  IEnumerableExtensions
+    public static class IEnumerableExtensions
     {
-        public static IEnumerable<T> Flatten<T>(this IEnumerable<T> source, Func<T, IEnumerable<T>> extractChildNodes)
+        public static IEnumerable<TNode> Flatten<TNode>(this TNode source, Func<TNode, IEnumerable<TNode>> extractChildNodes)
         {
+            var stack = new Stack<TNode>();
+            stack.Push(source);
 
+            while (stack.Count > 0)
+            {
+                TNode item = stack.Pop();
+                yield return item;
+                foreach (var child in extractChildNodes(item))
+                    stack.Push(child);
+
+            }
         }
 
         private class EqualityComparer<T> : IEqualityComparer<T>

@@ -64,6 +64,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncLock.cs" />
     <Compile Include="CodeGen\DBCGenerator.cs" />
     <Compile Include="CodeGen\Internal.cs" />
     <Compile Include="CodeGen\VMWrapper.cs" />
