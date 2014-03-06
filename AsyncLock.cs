@@ -41,8 +41,7 @@ namespace Mvvm
                 if (m_toRelease != null)
                     m_toRelease.m_semaphore.Release();
             }
-        } 
-
+        }
     }
 
     public class AsyncSemaphore
@@ -50,11 +49,13 @@ namespace Mvvm
         private readonly static Task s_completed = Task.FromResult(true);
         private readonly Queue<TaskCompletionSource<bool>> m_waiters = new Queue<TaskCompletionSource<bool>>();
         private int m_currentCount;
+        
         public AsyncSemaphore(int initialCount)
         {
             if (initialCount < 0) throw new ArgumentOutOfRangeException("initialCount");
             m_currentCount = initialCount;
         }
+
         public Task WaitAsync()
         {
             lock (m_waiters)
@@ -72,6 +73,7 @@ namespace Mvvm
                 }
             }
         }
+
         public void Release()
         {
             TaskCompletionSource<bool> toRelease = null;
