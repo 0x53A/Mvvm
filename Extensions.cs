@@ -37,9 +37,10 @@ namespace Mvvm
     /// </summary>
     public static class IEnumerableExtensions
     {
-        public static IEnumerable<T> SelectMany<T>(this IEnumerable<IEnumerable<T>> self)
+        public static IEnumerable<T2> SelectMany<T1,T2>(this IEnumerable<T1> self) where T1 : IEnumerable<T2>
         {
-            return self.SelectMany(x => x);
+            var res = self.SelectMany(x => x);
+            return res;
         }
 
         public static IEnumerable<TNode> Flatten<TNode>(this TNode source, Func<TNode, IEnumerable<TNode>> extractChildNodes)
