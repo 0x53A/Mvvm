@@ -12,7 +12,7 @@ namespace Mvvm.CodeGen
     {
         static MemberInfo TryFindMember(Type thingType, MemberInfo duckMember)
         {
-
+            return null;
         }
 
         public static bool CanCast<T>(object thing)
@@ -24,7 +24,9 @@ namespace Mvvm.CodeGen
             var thingType = thing.GetType();
             var members = FindAllMembers(duckType);
             Contract.Assume(members.All(m => m is MethodInfo || m is PropertyInfo));
-            var thingMembers = members.Select(m => TryFindMember(thingType, m));            
+            var thingMembers = members.Select(m => TryFindMember(thingType, m));
+
+            return true;
         }
 
         private static IEnumerable<MemberInfo> FindAllMembers(Type duckType)
@@ -33,12 +35,13 @@ namespace Mvvm.CodeGen
             var members = from i in interfaces
                           from ii in i.GetMembers()
                           select ii;
-            return members.Distinct((a,b)=>a.);
+            return members.Distinct();
         }
 
         public static T Cast<T>(object thing)
         {
             Contract.Requires(CanCast<T>(thing));
+            return default(T);
         }
     }
 }

@@ -33,8 +33,6 @@ namespace ReferenceCode
             eventFieldValue.Invoke(self, new PropertyChangedEventArgs(property));
         }
 
-        object m_duck;
-
         public int AccessGenerics()
         {
             var asd = new { Index = 5, X = 33, Y = 55 };
