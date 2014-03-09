@@ -103,6 +103,11 @@ namespace Mvvm
         {
             return String.Format(format, args);
         }
+
+        public static string[] Split(this string str, params string[] splitters)
+        {
+            return str.Split(splitters, StringSplitOptions.None);
+        }
     }
 
     /// <summary>
