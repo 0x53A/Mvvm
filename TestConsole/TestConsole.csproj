@@ -70,6 +70,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DuckTypingFS\DuckTypingFS.fsproj">
+      <Project>{4e6f4477-3602-412e-8b25-e818f5bca0a2}</Project>
+      <Name>DuckTypingFS</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MvvmFatFree.csproj">
       <Project>{14cdf2d3-403e-4c4c-8718-990914680286}</Project>
       <Name>MvvmFatFree</Name>

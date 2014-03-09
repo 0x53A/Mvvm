@@ -12,10 +12,27 @@ using System.Threading.Tasks;
 
 namespace TestConsole
 {
+    public interface IDuck
+    {
+        int Foo { get; set; }
+        int Bar { get; set; }
+    }
+
+
+    public class Thing
+    {
+        public int Foo { get; set; }
+        public int Bar { get; set; }
+    }
+
     public class Program
     {
         static void Main(string[] args)
         {
+            var asd = new Thing();
+            var iAsd = DuckTypingFS.DuckTyping.Cast<IDuck>(asd);
+            var foo = iAsd.Foo;
+            var bar = iAsd.Bar;
         }
     }
 }

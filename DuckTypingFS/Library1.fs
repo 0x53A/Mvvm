@@ -3,6 +3,7 @@ module DuckTypingFS
 
 open System
 open System.Reflection
+open System.Reflection.Emit
 open System.Diagnostics.Contracts
 open System.Collections
 open System.Collections.Generic
@@ -58,20 +59,48 @@ let flatten<'TNode> (source : 'TNode) (extract : ('TNode->'TNode seq)) =
             stack.Push(child)
   }
 
+let findDuckMemberInThing duckMember thingMembers =
+    let (dSig, dMI) = duckMember
+    thingMembers |> Seq.tryFind (fun (tSig, tMI) -> true)
+
+let getAllMembers (tp:Type) = 
+    flatten tp (fun t -> t.GetInterfaces() |> Array.toSeq)
+    |> Seq.distinct 
+    |> Seq.map (fun i -> i.GetMembers())
+    |> Seq.collect (fun x -> x)
+    |> Seq.map (fun m -> (getSignature m, m))
+    |> Seq.distinct
+
+exception DuckExceptionMemberMapping of MemberSignature array
+
 type DuckTyping =
   class
     static member Cast<'TDuck when 'TDuck: null and 'TDuck : not struct> thing =
         let duckType = typedefof<'TDuck>
+        let thingType = thing.GetType()
         Contract.Requires duckType.IsInterface
         Contract.Requires (thing <> null)
-        let duckMembers = flatten duckType (fun t -> t.GetInterfaces() |> Array.toSeq)
-                          |> Seq.distinct 
-                          |> Seq.map (fun i -> i.GetMembers())
-                          |> Seq.collect (fun x -> x)
-                          |> Seq.map (fun m -> (getSignature m, m))
-                          |> Seq.distinct
-        
-        
+        //get all members of the duck and the thing
+        let duckMembers = getAllMembers duckType |> Seq.toList
+        let thingMembers = getAllMembers thingType |> Seq.toList
+        //try to map all duckmembers to thingmembers
+        let mapping = duckMembers
+                      |> Seq.map (fun x -> (x,findDuckMemberInThing x thingMembers))
+                      |> Seq.toList
+        //see if the mapping was successfull
+        let mappingSuccess = mapping |> Seq.forall (fun (d,t) -> t.IsSome)
+        if not mappingSuccess then
+            let missingMembers = mapping |> Seq.where (fun (d,t) -> t.IsNone)
+                                 |> Seq.map (fun ((s, mi),t)->s) |> Seq.toArray
+            raise (DuckExceptionMemberMapping(missingMembers))
+        //we are still alive, so the mapping was a success
+        let assemblyName = sprintf "%s_%s_%s" duckType.Name thingType.Name (Guid.NewGuid().ToString())
+        let asm = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName),
+                                                                Emit.AssemblyBuilderAccess.RunAndSave)
+        let dynMod = asm.DefineDynamicModule("MainModule", assemblyName + ".mod.dll", true)
+        let tb = dynMod.DefineType(sprintf "__%s" duckType.Name)
+        let ctor = tb.DefineConstructor(MethodAttributes.)
         let nullptr : 'TDuck = null
         nullptr
   end
+
