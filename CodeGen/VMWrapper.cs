@@ -154,13 +154,7 @@ namespace Mvvm.CodeGen
 
             //create and return type
             var type = tb.CreateType();
-
-            //swap bodies
-            //if (hasINPC)
-            //{
-            //    CodeGenInternal.SwapDummies(type, dummyfindEventField, dummyRaiseBasePropertyChanged);
-            //}
-
+            
             if (dump == true)
                 ab.Save("{0}.dll".FormatWith(assemblyName));
 
