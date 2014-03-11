@@ -28,7 +28,7 @@ namespace Mvvm.CodeGen
         /// <summary>
         /// See Generate
         /// </summary>
-        public static Type Map<T>()
+        public static Type Map<T>(string typeName = "")
         {
             //T must be a property-only interface
             Contract.Requires(typeof(T).IsInterface);
@@ -37,13 +37,13 @@ namespace Mvvm.CodeGen
             Contract.Requires(typeof(T).GetProperties().Where(p => p.CanRead && !p.CanWrite).All(p => p.PropertyType.GetConstructor(Type.EmptyTypes) != null));
 
             Type targetType = typeof(T);
-            return Map(targetType);
+            return Map(targetType, typeName);
         }
 
         /// <summary>
         /// See Generate
         /// </summary>
-        public static Type Map(Type targetType)
+        public static Type Map(Type targetType, string typeName = "")
         {
             //T must be a property-only interface
             Contract.Requires(targetType.IsInterface);
@@ -85,7 +85,7 @@ namespace Mvvm.CodeGen
         /// <typeparam name="T">The Interface which should be implemented</typeparam>
         /// <param name="initializer">optional: a function which initializes the newly constructed object</param>
         /// <returns>a newly constructed object</returns>
-        public static T Generate<T>(Action<T> initializer = null) where T : class
+        public static T Generate<T>(Action<T> initializer = null, string typeName = "") where T : class
         {
             //T must be a property-only interface
             Contract.Requires(typeof(T).IsInterface);
@@ -95,7 +95,7 @@ namespace Mvvm.CodeGen
             //The returned value implements the interface INotifyPropertyChanged (but it is impossible to note that in the type system)
             Contract.Ensures(Contract.Result<T>() is INotifyPropertyChanged);
 
-            var mappedType = Map<T>();
+            var mappedType = Map<T>(typeName);
             var obj = (T)Activator.CreateInstance(mappedType);
             if (initializer != null)
                 initializer(obj);
