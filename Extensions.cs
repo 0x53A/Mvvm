@@ -37,6 +37,17 @@ namespace Mvvm
     /// </summary>
     public static class IEnumerableExtensions
     {
+        public static IEnumerable<T> TakeRange<T>(this IEnumerable<T> self, int startIndex, int count)
+        {
+            return self.Skip(startIndex).Take(count);
+        }
+
+        public static void ForAll<T>(this IEnumerable<T> self, Action<T> action)
+        {
+            foreach (var item in self)
+                action(item);
+        }
+
         public static IEnumerable<T2> SelectMany<T1,T2>(this IEnumerable<T1> self) where T1 : IEnumerable<T2>
         {
             var res = self.SelectMany(x => x);
