@@ -130,7 +130,7 @@ namespace Mvvm
         /// <typeparam name="T">Any class type</typeparam>
         /// <param name="obj">Object to serialize</param>
         /// <returns>A string that represents Xml, empty otherwise</returns>
-        public static string XmlSerialize<T>(this T obj) where T : class, new()
+        public static string XmlSerialize<T>(this T obj)
         {
             if (obj == null) throw new ArgumentNullException("obj");
 
@@ -146,7 +146,7 @@ namespace Mvvm
         /// <typeparam name="T">Any class type</typeparam>
         /// <param name="xml">Xml as string to deserialize from</param>
         /// <returns>A new object of type T is successful, null if failed</returns>
-        public static T XmlDeserialize<T>(this string xml) where T : class, new()
+        public static T XmlDeserialize<T>(this string xml)
         {
             if (xml == null) throw new ArgumentNullException("xml");
 
