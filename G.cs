@@ -27,7 +27,7 @@ namespace Mvvm
             return (string)element.GetValue(RowsProperty);
         }
 
-        public static void OnRowsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        static void OnRowsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var grid = obj as System.Windows.Controls.Grid;
             if (grid == null)
@@ -71,7 +71,7 @@ namespace Mvvm
             return (string)element.GetValue(ColumnsProperty);
         }
 
-        public static void OnColumnsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        static void OnColumnsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var grid = obj as System.Windows.Controls.Grid;
             if (grid == null)
@@ -96,6 +96,93 @@ namespace Mvvm
             var converter = new GridLengthConverter();
             foreach (var Column in substrings)
                 col.Add(new ColumnDefinition() { Width = (GridLength)converter.ConvertFrom(Column) });
+        }
+
+        /* Autoset */
+
+        public static readonly DependencyProperty AutoArrange = DependencyProperty.RegisterAttached("AutoArrange", typeof(bool), typeof(G), new FrameworkPropertyMetadata(false, new PropertyChangedCallback(OnAutoArrangeChanged)));
+
+        public static void SetAutoArrange(DependencyObject element, bool value)
+        {
+            element.SetValue(AutoArrange, value);
+        }
+
+        public static bool GetAutoArrange(DependencyObject element)
+        {
+            return (bool)element.GetValue(AutoArrange);
+        }
+
+        static Dictionary<Grid, Tuple<int, int, int>> gridValues = new Dictionary<Grid, Tuple<int, int, int>>();
+
+        static void RecalculateGrid(Grid grid)
+        {
+            var rows = grid.RowDefinitions.Count;
+            if (rows == 0)
+                rows = 1;
+            var columns = grid.ColumnDefinitions.Count;
+            if (columns == 0)
+                columns = 1;
+            var nChildren = grid.Children.Count;
+
+            var tuple = Tuple.Create(rows, columns, nChildren);
+            if ((!gridValues.ContainsKey(grid)) || gridValues[grid] != tuple)
+            {
+                for (int i = 0; i < nChildren; i++)
+                {
+                    var column = i % columns;
+                    var row = i / columns;
+                    var child = grid.Children[i];
+
+                    Grid.SetRow(child, row);
+                    Grid.SetColumn(child, column);
+                }
+                gridValues[grid] = tuple;
+            }
+        }
+
+        static void OnAutoArrangeChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        {
+            var grid = obj as System.Windows.Controls.Grid;
+            if (grid == null)
+                throw new Exception();
+
+            var newValue = (bool)args.NewValue;
+            var oldValue = GetAutoArrange(grid);
+
+            grid.Loaded -= grid_RoutedUpdated;
+            grid.LayoutUpdated -= grid_Updated;
+            grid.IsVisibleChanged -= grid_IsVisibleChanged;
+            grid.SourceUpdated -= grid_Updated;
+            grid.TargetUpdated -= grid_Updated;
+            grid.LayoutUpdated -= grid_Updated;
+            if (newValue)
+            {
+                grid.Loaded += grid_RoutedUpdated;
+                grid.LayoutUpdated += grid_Updated;
+                grid.IsVisibleChanged += grid_IsVisibleChanged;
+                grid.SourceUpdated += grid_Updated;
+                grid.TargetUpdated += grid_Updated;
+                grid.LayoutUpdated += grid_Updated;
+                RecalculateGrid(grid);
+            }
+        }
+
+        static void grid_RoutedUpdated(object sender, RoutedEventArgs e)
+        {
+            if (sender != null && sender is Grid)
+                RecalculateGrid(sender as Grid);
+        }
+
+        static void grid_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender != null && sender is Grid)
+                RecalculateGrid(sender as Grid);
+        }
+
+        static void grid_Updated(object sender, EventArgs e)
+        {
+            if (sender != null && sender is Grid)
+                RecalculateGrid(sender as Grid);
         }
     }
 }

@@ -148,13 +148,13 @@ namespace Mvvm.CodeGen
 
             //emit the default constructor
             ctorIL.Emit(OpCodes.Ldarg_0);
-            ctorIL.Emit(OpCodes.Call, targetType.GetConstructor(Type.EmptyTypes));
+            ctorIL.Emit(OpCodes.Call, targetType.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null));
             ctorIL.Emit(OpCodes.Nop);
             ctorIL.Emit(OpCodes.Ret);
 
             //create and return type
             var type = tb.CreateType();
-            
+
             if (dump == true)
                 ab.Save("{0}.dll".FormatWith(assemblyName));
 

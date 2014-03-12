@@ -65,7 +65,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncLock.cs" />
+    <Compile Include="CodeGen\CG.cs" />
     <Compile Include="CodeGen\DBCGenerator.cs" />
+    <Compile Include="CodeGen\GeneratedTypeNameAttribute.cs" />
     <Compile Include="CodeGen\Internal.cs" />
     <Compile Include="CodeGen\VMWrapper.cs" />
     <Compile Include="EventToCommand.cs" />

@@ -28,7 +28,7 @@ namespace Mvvm.CodeGen
         /// <summary>
         /// See Generate
         /// </summary>
-        public static Type Map<T>(string typeName = "")
+        public static Type Map<T>()
         {
             //T must be a property-only interface
             Contract.Requires(typeof(T).IsInterface);
@@ -37,13 +37,13 @@ namespace Mvvm.CodeGen
             Contract.Requires(typeof(T).GetProperties().Where(p => p.CanRead && !p.CanWrite).All(p => p.PropertyType.GetConstructor(Type.EmptyTypes) != null));
 
             Type targetType = typeof(T);
-            return Map(targetType, typeName);
+            return Map(targetType);
         }
 
         /// <summary>
         /// See Generate
         /// </summary>
-        public static Type Map(Type targetType, string typeName = "")
+        public static Type Map(Type targetType)
         {
             //T must be a property-only interface
             Contract.Requires(targetType.IsInterface);
@@ -85,7 +85,7 @@ namespace Mvvm.CodeGen
         /// <typeparam name="T">The Interface which should be implemented</typeparam>
         /// <param name="initializer">optional: a function which initializes the newly constructed object</param>
         /// <returns>a newly constructed object</returns>
-        public static T Generate<T>(Action<T> initializer = null, string typeName = "") where T : class
+        public static T Generate<T>(Action<T> initializer = null)
         {
             //T must be a property-only interface
             Contract.Requires(typeof(T).IsInterface);
@@ -95,7 +95,7 @@ namespace Mvvm.CodeGen
             //The returned value implements the interface INotifyPropertyChanged (but it is impossible to note that in the type system)
             Contract.Ensures(Contract.Result<T>() is INotifyPropertyChanged);
 
-            var mappedType = Map<T>(typeName);
+            var mappedType = Map<T>();
             var obj = (T)Activator.CreateInstance(mappedType);
             if (initializer != null)
                 initializer(obj);
@@ -144,14 +144,16 @@ namespace Mvvm.CodeGen
             else
                 mb = ab.DefineDynamicModule("generated");
 
-            var tb = mb.DefineType("dbc_{0}".FormatWith(targetType.FullName), CodeGenInternal.GeneratedTypeAttributes, null, new[] { targetType, typeof(INotifyPropertyChanged) });
+            var attr = targetType.GetCustomAttribute<GeneratedTypeNameAttribute>();
+            var name = attr != null ? attr.TypeName : targetType.FullName;
+            var tb = mb.DefineType(name, CodeGenInternal.GeneratedTypeAttributes, null, new[] { targetType, typeof(INotifyPropertyChanged) });
 
             var constructor = tb.DefineConstructor(CodeGenInternal.ConstructorAttributes, CallingConventions.HasThis, null);
             var ctorIL = constructor.GetILGenerator();
 
             var raiseMethod = CodeGenInternal.ImplementInpcFull(tb);
 
-            foreach (var property in targetType.GetProperties())
+            foreach (var property in targetType.Flatten(t => t.GetInterfaces()).SelectMany(i => i.GetProperties()))
             {
                 if (property.CanRead && property.CanWrite)
                     CodeGenInternal.CreateReadWriteProperty(tb, property, raiseMethod);
