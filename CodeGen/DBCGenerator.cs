@@ -134,6 +134,10 @@ namespace Mvvm.CodeGen
 #endif
             }
 
+            var intArray = new[] { 5, 6, 7, 8, 9, 10 };
+            var even = intArray.Where(i => i % 2 == 0);
+
+
             var access = (dump == true) ? AssemblyBuilderAccess.RunAndSave : AssemblyBuilderAccess.Run;
             var assemblyName = "assembly_{0}_{1}".FormatWith(targetType.FullName, Guid.NewGuid());
             var ab = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName), access);

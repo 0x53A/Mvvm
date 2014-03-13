@@ -95,21 +95,6 @@ let getDelegateType (mi : MethodInfo) =
         let bound = unbound.MakeGenericType(parameters)
         bound
 
-let mapMember (tb,ctorIL) (duck, thing) =
-    match duck with
-    | Method (m) ->
-        raise (NotImplementedException())
-        (tb, ctorIL)       
-    | Event (e) ->
-        raise (NotImplementedException())
-        (tb, ctorIL)
-    | Property (p) ->
-        raise (NotImplementedException())
-        (tb, ctorIL)
-    | Field(_)
-    | Other -> raise (InvalidOperationException())
-
-exception DuckExceptionMemberMapping of Member array
 
 /// the attributes of the generated type
 let GeneratedTypeAttributes = TypeAttributes.Public ||| TypeAttributes.Class ||| TypeAttributes.AutoClass |||
@@ -130,6 +115,48 @@ let PrivateInstanceMethodAttributes = MethodAttributes.Private ||| MethodAttribu
 
 /// the Attributes for a normal, nonvirtual instance method
 let PrivateStaticMethodAttributes = MethodAttributes.Private ||| MethodAttributes.HideBySig ||| MethodAttributes.Static
+
+let mapMember ((tb:TypeBuilder),(ctorIL:ILGenerator), (methods:MethodBuilder list)) (duck, thing) =
+    match duck with
+    | Method (m) ->
+        let combMethods =
+            if not m.IsPublic then
+                //implement a backing delegate and call it
+                let delegateType = getDelegateType m
+                let fb = tb.DefineField("_backing_" + m.Name, delegateType, FieldAttributes.Public)
+                let invoke = fb.FieldType.GetMethod("Invoke");
+                let methodProps = InterfaceImplementationAttributes
+                let paramTypes = m.GetParameters() |> Seq.map (fun p -> p.ParameterType) |> Seq.toArray
+                let mb = tb.DefineMethod(m.Name, methodProps, m.ReturnType,  paramTypes)
+                let mIL = mb.GetILGenerator();
+                mIL.Emit(OpCodes.Ldarg_0)
+                for i in 1 .. paramTypes.Length do
+                    mIL.Emit(OpCodes.Ldarg, i)                
+                mIL.Emit(OpCodes.Ldfld, fb)
+                mIL.EmitCall(OpCodes.Callvirt, invoke, null)
+                mIL.Emit(OpCodes.Ret)         
+                mb :: methods
+            else
+                methods
+        (tb, ctorIL, combMethods)       
+    | Event (e) ->
+        raise (NotImplementedException())
+        (tb, ctorIL, methods)
+    | Property (p) ->
+        let pb = tb.DefineProperty(p.Name, PropertyAttributes.None, p.PropertyType, null)
+        if p.CanRead then
+            let getterName = "get_" + p.Name
+            let getter = methods |> Seq.find (fun m -> m.Name = getterName)
+            pb.SetGetMethod(getter)
+        if p.CanWrite then
+            let setterName = "set_" + p.Name
+            let setter = methods |> Seq.find (fun m -> m.Name = setterName)
+            pb.SetSetMethod(setter)
+        (tb, ctorIL, methods)
+    | Field(_)
+    | Other -> raise (InvalidOperationException())
+
+exception DuckExceptionMemberMapping of Member array
 
 let mapType (duckType: Type) (thingType: Type) =
     Contract.Requires duckType.IsInterface
@@ -159,7 +186,7 @@ let mapType (duckType: Type) (thingType: Type) =
     //implement all members
     //methods must be implemented prior to properties, as a property depends on the get_ set_ methods
     let sorted = mapping |> Seq.sortBy (fun (m,_) -> match m with | Method (_) -> 0 | Event (_) -> 1 | Field (_) -> 2 | Property (_) -> 3 | Other -> raise (InvalidOperationException()) )
-    let finalState = sorted |> Seq.fold mapMember (tb, ctorIL)
+    let finalState = sorted |> Seq.fold mapMember (tb, ctorIL, ([] : MethodBuilder list))
 
     //emit the default constructor
     ctorIL.Emit(OpCodes.Ldarg_0)
@@ -170,8 +197,7 @@ let mapType (duckType: Type) (thingType: Type) =
     let generatedType = tb.CreateType()
     asm.Save(sprintf "%s.dll" assemblyName)
     generatedType
-
-
+    
 type DuckTyping =
   class
     static member private _mappings = new Dictionary<Tuple<Type,Type>, Type>()
