@@ -53,15 +53,25 @@ let areMembersEqual a b =
         m1.Name = m2.Name  && m1.ReturnType = m2.ReturnType && (Seq.compareWith (fun aa bb -> if aa = bb then 0 else 5)  p2 p1) = 0
     | Property p1, Property p2 ->
         p1.PropertyType = p2.PropertyType && p1.Name = p2.Name
+    | Field f1, Field f2 ->
+        f1.FieldType = f2.FieldType && f1.Name = f2.Name
     | _ -> false
 
 let findDuckMemberInThing (duckMember : Member) thingMembers =
     let d = duckMember
     thingMembers |> Seq.tryFind (fun t -> areMembersEqual t d)
 
-let getAllMembers (tp : Type) = 
-    tp.GetMembers(BindingFlags.FlattenHierarchy ||| BindingFlags.Instance ||| BindingFlags.NonPublic ||| BindingFlags.Public)
-    |> Seq.map (fun m -> (toMember m))
+let rec getAllMembers_r (tp : Type) =  seq{
+    let membersOfThis = tp.GetMembers(BindingFlags.FlattenHierarchy ||| BindingFlags.Instance ||| BindingFlags.NonPublic ||| BindingFlags.Public)
+                        |> Seq.map (fun m -> (toMember m))
+    yield! membersOfThis
+    for intf in tp.GetInterfaces() do
+        yield! getAllMembers_r intf
+    }
+
+let getAllMembers (tp : Type) =
+    getAllMembers_r tp
+    |> Seq.distinct
 
 let voidType = Type.GetType("System.Void")
 
@@ -98,7 +108,7 @@ let getDelegateType (mi : MethodInfo) =
                         | 9 -> typedefof<Func<_,_,_,_,_,_,_,_,_,_>>
                         | _ -> raise (InvalidOperationException())
         let genericTypes = Array.concat [ parameters; [| retVal |] ] // the return value is the last generic parameter
-        let bound = unbound.MakeGenericType(parameters)
+        let bound = unbound.MakeGenericType(genericTypes)
         bound
 
 
@@ -122,32 +132,33 @@ let PrivateInstanceMethodAttributes = MethodAttributes.Private ||| MethodAttribu
 /// the Attributes for a normal, nonvirtual instance method
 let PrivateStaticMethodAttributes = MethodAttributes.Private ||| MethodAttributes.HideBySig ||| MethodAttributes.Static
 
-let mapMember ((tb:TypeBuilder),(ctorIL:ILGenerator),(methods:MethodBuilder list),(duckField:FieldBuilder)) (duck, thing) =
-    match duck with
+let mapMember ((tb:TypeBuilder),(ctorIL:ILGenerator),(methods:MethodBuilder list),(duckField:FieldBuilder),delegates,isTypePublic) (duck, thing) =
+    match thing with
     | Method (m) ->
         let methodProps = InterfaceImplementationAttributes
         let paramTypes = m.GetParameters() |> Seq.map (fun p -> p.ParameterType) |> Seq.toArray
         let mb = tb.DefineMethod(m.Name, methodProps, m.ReturnType,  paramTypes)
-        let mIL = mb.GetILGenerator();
+        let mIL = mb.GetILGenerator()
         mIL.Emit(OpCodes.Ldarg_0)
-        if not m.IsPublic then
+        if not m.IsPublic || not isTypePublic then
             //implement a backing delegate and call it
             let delegateType = getDelegateType m
             let fb = tb.DefineField("_backing_" + m.Name, delegateType, FieldAttributes.Public)
-            let invoke = fb.FieldType.GetMethod("Invoke");
+            let invoke = fb.FieldType.GetMethod("Invoke")
             for i in 1 .. paramTypes.Length do
-                mIL.Emit(OpCodes.Ldarg, i)                
+                mIL.Emit(OpCodes.Ldarg, i)
             mIL.Emit(OpCodes.Ldfld, fb)
             mIL.EmitCall(OpCodes.Callvirt, invoke, null)
             mIL.Emit(OpCodes.Ret)
+            (tb, ctorIL, mb :: methods, duckField, (fb,m) :: delegates, isTypePublic)
         else
             //directly call the method
             mIL.Emit(OpCodes.Ldfld, duckField)
             for i in 1 .. paramTypes.Length do
                 mIL.Emit(OpCodes.Ldarg, i)
             mIL.Emit(OpCodes.Call, m)
-            mIL.Emit(OpCodes.Ret)        
-        (tb, ctorIL, mb :: methods, duckField)       
+            mIL.Emit(OpCodes.Ret)
+            (tb, ctorIL, mb :: methods, duckField, delegates, isTypePublic)
     | Event (e) ->
         raise (NotImplementedException())
     | Property (p) ->
@@ -160,11 +171,23 @@ let mapMember ((tb:TypeBuilder),(ctorIL:ILGenerator),(methods:MethodBuilder list
             let setterName = "set_" + p.Name
             let setter = methods |> Seq.find (fun m -> m.Name = setterName)
             pb.SetSetMethod(setter)
-        (tb, ctorIL, methods, duckField)
+        (tb, ctorIL, methods, duckField, delegates, isTypePublic)
     | Field(_)
     | Other -> raise (InvalidOperationException())
 
 exception DuckExceptionMemberMapping of Member array
+
+let sanitizeFilename (file : string) =
+    let invalidChars = System.IO.Path.GetInvalidFileNameChars()
+    let mutable xx = file
+    for c in invalidChars do
+        xx <- xx.Replace(c, '_')
+    xx
+
+let toField f =
+    match f with
+    | Field f -> f
+    | _ -> raise (InvalidOperationException())
 
 let mapType (duckType: Type) (thingType: Type) =
     Contract.Requires duckType.IsInterface
@@ -184,6 +207,7 @@ let mapType (duckType: Type) (thingType: Type) =
     //we are still alive, so the mapping was a success
     let mapping = tryMapping |> Seq.map (fun (a,b)->(a,b.Value))
     let assemblyName = sprintf "%s_%s_%s" duckType.Name thingType.Name (Guid.NewGuid().ToString())
+                       |> sanitizeFilename
     let asm = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName),
                                                             Emit.AssemblyBuilderAccess.RunAndSave)
     let dynMod = asm.DefineDynamicModule("MainModule", assemblyName + ".mod.dll", true)
@@ -197,7 +221,7 @@ let mapType (duckType: Type) (thingType: Type) =
     //implement all members
     //methods must be implemented prior to properties, as a property depends on the get_ set_ methods
     let sorted = mapping |> Seq.sortBy (fun (m,_) -> match m with | Method (_) -> 0 | Event (_) -> 1 | Field (_) -> 2 | Property (_) -> 3 | Other -> raise (InvalidOperationException()) )
-    let finalState = sorted |> Seq.fold mapMember (tb, ctorIL, ([] : MethodBuilder list), duckField)
+    let (_,_,_,_,delegates,_) = sorted |> Seq.fold mapMember (tb, ctorIL, List.empty, duckField, List.empty, thingType.IsPublic)
 
     //emit the constructor
     ctorIL.Emit(OpCodes.Ldarg_0)
@@ -209,11 +233,16 @@ let mapType (duckType: Type) (thingType: Type) =
 
     let generatedType = tb.CreateType()
     asm.Save(sprintf "%s.dll" assemblyName)
-    generatedType
+    let membersOfRealType = getAllMembers generatedType
+    let realDelegates = delegates |> List.map (fun (a,b) -> (toField (findDuckMemberInThing (Field(a)) membersOfRealType).Value, b))
+    (generatedType, realDelegates)
     
+type MappingKey = { TDuck : Type; TThing : Type }
+type MappingValue = { T : Type; Delegates : (FieldInfo*MethodInfo) list }
+
 type DuckTyping =
   class
-    static member private _mappings = new Dictionary<Tuple<Type,Type>, Type>()
+    static member private _mappings = new Dictionary<MappingKey, MappingValue>()
     static member private _lock = new Object()
 
     //Casts a Thing to an interface IDuck.
@@ -222,20 +251,24 @@ type DuckTyping =
         Contract.Requires (thing <> null)
         let tDuck = typedefof<'TDuck>
         let tThing = thing.GetType()
-       // Monitor.Enter (DuckTyping._lock)
-        try
-            let key : Tuple<Type,Type> = new System.Tuple<Type,Type>(tDuck, tThing)
-            let mappedType =
-                if DuckTyping._mappings.ContainsKey (key) then
-                    DuckTyping._mappings.[key]
-                else
-                    let mt = mapType  tDuck tThing
-                    DuckTyping._mappings.Add(key, mt)
-                    mt
-            //raise (InvalidOperationException())
-            Activator.CreateInstance(mappedType, [| thing |]) :?> 'TDuck
-            //TODO: fill Delegates
-        finally ()
-            //Monitor.Exit (DuckTyping._lock)
+        
+
+        let key = { TDuck = tDuck; TThing = tThing }
+        let mv = lock (DuckTyping._lock) (fun x ->
+            if DuckTyping._mappings.ContainsKey (key) then
+                DuckTyping._mappings.[key]
+            else
+                let (t,del) = mapType tDuck tThing
+                let value = { T = t; Delegates = del }
+                DuckTyping._mappings.Add(key, value)
+                value  
+           )
+
+        let instance = Activator.CreateInstance(mv.T, [| thing |]) :?> 'TDuck
+              
+        for (a,b) in mv.Delegates do
+            let deleg = b.CreateDelegate(a.FieldType, thing)
+            a.SetValue(instance, deleg)
+        instance
   end
 

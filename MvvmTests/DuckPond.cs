@@ -27,5 +27,24 @@ namespace MvvmTests
             var foo = iAsd.Foo;
             var bar = iAsd.Bar;
         }
+
+        public interface IAnonDuck
+        {
+            int Foo { get; }
+            int Bar { get; }
+        }
+
+        [TestMethod]
+        public void TestAnonymousDuck()
+        {
+            var thing = new { Foo = 5, Bar = 66 };
+            IAnonDuck iDuck = DuckTypingFS.DuckTyping.Cast<IAnonDuck>(thing);
+            var foo = iDuck.Foo;
+            var bar = iDuck.Bar;
+            Assert.AreEqual(thing.Foo, foo);
+            Assert.AreEqual(thing.Bar, bar);
+            Assert.AreEqual(thing.Foo, 5);
+            Assert.AreEqual(thing.Bar, 66);
+        }
     }
 }
