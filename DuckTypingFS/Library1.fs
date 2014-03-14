@@ -143,7 +143,7 @@ let mapMember ((tb:TypeBuilder),(ctorIL:ILGenerator),(methods:MethodBuilder list
         else      
             mIL.Emit(OpCodes.Ldfld, duckField)
             for i in 1 .. paramTypes.Length do
-                mIL.Emit(OpCodes.Ldarg, i)  
+                mIL.Emit(OpCodes.Ldarg, i)
             mIL.Emit(OpCodes.Call, m)
             mIL.Emit(OpCodes.Ret)        
         (tb, ctorIL, mb :: methods, duckField)       
@@ -216,8 +216,8 @@ type DuckTyping =
     static member private _mappings = new Dictionary<Tuple<Type,Type>, Type>()
     static member private _lock = new Object()
 
-    ///Casts a Thing to an interfae IDuck.
-    ///The thing must implement all members of IDuck.
+    //Casts a Thing to an interface IDuck.
+    //The thing must implement all members of IDuck.
     static member Cast<'TDuck when 'TDuck: null and 'TDuck : not struct> thing =
         Contract.Requires (thing <> null)
         let tDuck = typedefof<'TDuck>

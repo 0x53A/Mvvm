@@ -30,7 +30,7 @@ namespace TestConsole
         static void Main(string[] args)
         {
             var asd = new Thing();
-            var iAsd = DuckTypingFS.DuckTyping.Cast<IDuck>(asd);
+            dynamic iAsd = DuckTypingFS.DuckTyping.Cast<IDuck>(asd);
             var foo = iAsd.Foo;
             var bar = iAsd.Bar;
         }
