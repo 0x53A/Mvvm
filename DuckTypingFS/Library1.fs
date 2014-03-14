@@ -40,22 +40,28 @@ let toMember (memberInfo : MemberInfo) =
 
 let rec flatten<'TNode> (source : 'TNode) (extract : ('TNode->'TNode seq)) =
   seq {
+    yield source
     for child in extract(source) do
-        yield child
         yield! flatten child extract
   }
 
+let areMembersEqual a b =
+    match a,b with
+    | Method m1, Method m2 -> 
+        let p1 = m1.GetParameters() |> Array.map (fun p -> p.ParameterType)
+        let p2 = m2.GetParameters() |> Array.map (fun p -> p.ParameterType)
+        m1.Name = m2.Name  && m1.ReturnType = m2.ReturnType && (Seq.compareWith (fun aa bb -> if aa = bb then 0 else 5)  p2 p1) = 0
+    | Property p1, Property p2 ->
+        p1.PropertyType = p2.PropertyType && p1.Name = p2.Name
+    | _ -> false
+
 let findDuckMemberInThing (duckMember : Member) thingMembers =
     let d = duckMember
-    thingMembers |> Seq.tryFind (fun t -> raise (NotImplementedException()))
+    thingMembers |> Seq.tryFind (fun t -> areMembersEqual t d)
 
 let getAllMembers (tp : Type) = 
-    flatten tp (fun t -> t.GetInterfaces() |> Array.toSeq)
-    |> Seq.distinct 
-    |> Seq.map (fun i -> i.GetMembers())
-    |> Seq.collect (fun x -> x)
+    tp.GetMembers(BindingFlags.FlattenHierarchy ||| BindingFlags.Instance ||| BindingFlags.NonPublic ||| BindingFlags.Public)
     |> Seq.map (fun m -> (toMember m))
-    |> Seq.distinct
 
 let voidType = Type.GetType("System.Void")
 
@@ -116,32 +122,33 @@ let PrivateInstanceMethodAttributes = MethodAttributes.Private ||| MethodAttribu
 /// the Attributes for a normal, nonvirtual instance method
 let PrivateStaticMethodAttributes = MethodAttributes.Private ||| MethodAttributes.HideBySig ||| MethodAttributes.Static
 
-let mapMember ((tb:TypeBuilder),(ctorIL:ILGenerator), (methods:MethodBuilder list)) (duck, thing) =
+let mapMember ((tb:TypeBuilder),(ctorIL:ILGenerator),(methods:MethodBuilder list),(duckField:FieldBuilder)) (duck, thing) =
     match duck with
     | Method (m) ->
-        let combMethods =
-            if not m.IsPublic then
-                //implement a backing delegate and call it
-                let delegateType = getDelegateType m
-                let fb = tb.DefineField("_backing_" + m.Name, delegateType, FieldAttributes.Public)
-                let invoke = fb.FieldType.GetMethod("Invoke");
-                let methodProps = InterfaceImplementationAttributes
-                let paramTypes = m.GetParameters() |> Seq.map (fun p -> p.ParameterType) |> Seq.toArray
-                let mb = tb.DefineMethod(m.Name, methodProps, m.ReturnType,  paramTypes)
-                let mIL = mb.GetILGenerator();
-                mIL.Emit(OpCodes.Ldarg_0)
-                for i in 1 .. paramTypes.Length do
-                    mIL.Emit(OpCodes.Ldarg, i)                
-                mIL.Emit(OpCodes.Ldfld, fb)
-                mIL.EmitCall(OpCodes.Callvirt, invoke, null)
-                mIL.Emit(OpCodes.Ret)         
-                mb :: methods
-            else
-                methods
-        (tb, ctorIL, combMethods)       
+        let methodProps = InterfaceImplementationAttributes
+        let paramTypes = m.GetParameters() |> Seq.map (fun p -> p.ParameterType) |> Seq.toArray
+        let mb = tb.DefineMethod(m.Name, methodProps, m.ReturnType,  paramTypes)
+        let mIL = mb.GetILGenerator();
+        mIL.Emit(OpCodes.Ldarg_0)
+        if not m.IsPublic then
+            //implement a backing delegate and call it
+            let delegateType = getDelegateType m
+            let fb = tb.DefineField("_backing_" + m.Name, delegateType, FieldAttributes.Public)
+            let invoke = fb.FieldType.GetMethod("Invoke");
+            for i in 1 .. paramTypes.Length do
+                mIL.Emit(OpCodes.Ldarg, i)                
+            mIL.Emit(OpCodes.Ldfld, fb)
+            mIL.EmitCall(OpCodes.Callvirt, invoke, null)
+            mIL.Emit(OpCodes.Ret)
+        else      
+            mIL.Emit(OpCodes.Ldfld, duckField)
+            for i in 1 .. paramTypes.Length do
+                mIL.Emit(OpCodes.Ldarg, i)  
+            mIL.Emit(OpCodes.Call, m)
+            mIL.Emit(OpCodes.Ret)        
+        (tb, ctorIL, mb :: methods, duckField)       
     | Event (e) ->
         raise (NotImplementedException())
-        (tb, ctorIL, methods)
     | Property (p) ->
         let pb = tb.DefineProperty(p.Name, PropertyAttributes.None, p.PropertyType, null)
         if p.CanRead then
@@ -152,7 +159,7 @@ let mapMember ((tb:TypeBuilder),(ctorIL:ILGenerator), (methods:MethodBuilder lis
             let setterName = "set_" + p.Name
             let setter = methods |> Seq.find (fun m -> m.Name = setterName)
             pb.SetSetMethod(setter)
-        (tb, ctorIL, methods)
+        (tb, ctorIL, methods, duckField)
     | Field(_)
     | Other -> raise (InvalidOperationException())
 
@@ -179,17 +186,23 @@ let mapType (duckType: Type) (thingType: Type) =
     let asm = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName),
                                                             Emit.AssemblyBuilderAccess.RunAndSave)
     let dynMod = asm.DefineDynamicModule("MainModule", assemblyName + ".mod.dll", true)
-    let tb = dynMod.DefineType(sprintf "__%s_duck" duckType.Name, GeneratedTypeAttributes)
+    let tb = dynMod.DefineType(sprintf "__%s_duck" duckType.Name, GeneratedTypeAttributes, typedefof<Object>, [| duckType |])
     let ctor = tb.DefineConstructor(ConstructorAttributes, CallingConventions.HasThis, [| thingType |])
     let ctorIL = ctor.GetILGenerator()
+
+    //implement the duck field
+    let duckField = tb.DefineField("__duck", duckType, FieldAttributes.Private)
 
     //implement all members
     //methods must be implemented prior to properties, as a property depends on the get_ set_ methods
     let sorted = mapping |> Seq.sortBy (fun (m,_) -> match m with | Method (_) -> 0 | Event (_) -> 1 | Field (_) -> 2 | Property (_) -> 3 | Other -> raise (InvalidOperationException()) )
-    let finalState = sorted |> Seq.fold mapMember (tb, ctorIL, ([] : MethodBuilder list))
+    let finalState = sorted |> Seq.fold mapMember (tb, ctorIL, ([] : MethodBuilder list), duckField)
 
-    //emit the default constructor
+    //emit the constructor
     ctorIL.Emit(OpCodes.Ldarg_0)
+    ctorIL.Emit(OpCodes.Ldarg_1)
+    raise (InvalidOperationException())
+    //ctorIL.Emit(OpCodes.Stfld, duckField)
     ctorIL.Emit(OpCodes.Call, typedefof<Object>.GetConstructor(Type.EmptyTypes))
     ctorIL.Emit(OpCodes.Nop)
     ctorIL.Emit(OpCodes.Ret)
@@ -209,7 +222,7 @@ type DuckTyping =
         Contract.Requires (thing <> null)
         let tDuck = typedefof<'TDuck>
         let tThing = thing.GetType()
-        Monitor.Enter (DuckTyping._lock)
+       // Monitor.Enter (DuckTyping._lock)
         try
             let key : Tuple<Type,Type> = new System.Tuple<Type,Type>(tDuck, tThing)
             let mappedType =
@@ -219,8 +232,10 @@ type DuckTyping =
                     let mt = mapType  tDuck tThing
                     DuckTyping._mappings.Add(key, mt)
                     mt
+            raise (InvalidOperationException())
             Activator.CreateInstance(mappedType, [| thing |]) :?> 'TDuck
-        finally
-            Monitor.Exit (DuckTyping._lock)
+            //TODO: fill Delegates
+        finally ()
+            //Monitor.Exit (DuckTyping._lock)
   end
 
