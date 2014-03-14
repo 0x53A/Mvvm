@@ -140,7 +140,8 @@ let mapMember ((tb:TypeBuilder),(ctorIL:ILGenerator),(methods:MethodBuilder list
             mIL.Emit(OpCodes.Ldfld, fb)
             mIL.EmitCall(OpCodes.Callvirt, invoke, null)
             mIL.Emit(OpCodes.Ret)
-        else      
+        else
+            //directly call the method
             mIL.Emit(OpCodes.Ldfld, duckField)
             for i in 1 .. paramTypes.Length do
                 mIL.Emit(OpCodes.Ldarg, i)  
@@ -200,11 +201,10 @@ let mapType (duckType: Type) (thingType: Type) =
 
     //emit the constructor
     ctorIL.Emit(OpCodes.Ldarg_0)
-    ctorIL.Emit(OpCodes.Ldarg_1)
-    raise (InvalidOperationException())
-    //ctorIL.Emit(OpCodes.Stfld, duckField)
     ctorIL.Emit(OpCodes.Call, typedefof<Object>.GetConstructor(Type.EmptyTypes))
-    ctorIL.Emit(OpCodes.Nop)
+    ctorIL.Emit(OpCodes.Ldarg_0)
+    ctorIL.Emit(OpCodes.Ldarg_1)
+    ctorIL.Emit(OpCodes.Stfld, duckField)
     ctorIL.Emit(OpCodes.Ret)
 
     let generatedType = tb.CreateType()
@@ -232,7 +232,7 @@ type DuckTyping =
                     let mt = mapType  tDuck tThing
                     DuckTyping._mappings.Add(key, mt)
                     mt
-            raise (InvalidOperationException())
+            //raise (InvalidOperationException())
             Activator.CreateInstance(mappedType, [| thing |]) :?> 'TDuck
             //TODO: fill Delegates
         finally ()
