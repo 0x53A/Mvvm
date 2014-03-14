@@ -154,7 +154,7 @@ namespace Mvvm
             using (var reader = new StringReader(xml))
             {
                 try { return (T)serializer.Deserialize(reader); }
-                catch { return null; } // Could not be deserialized to this type.
+                catch { return default(T); } // Could not be deserialized to this type.
             }
         }
     }
