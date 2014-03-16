@@ -73,6 +73,7 @@
     <Compile Include="INPCTests.cs" />
     <Compile Include="INPCBinding.cs" />
     <Compile Include="DuckPond.cs" />
+    <Compile Include="XmlSerialization.cs" />
     <Compile Include="VMWrapperTests.cs" />
   </ItemGroup>
   <ItemGroup>
