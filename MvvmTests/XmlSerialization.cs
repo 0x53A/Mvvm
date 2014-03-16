@@ -40,8 +40,9 @@ namespace MvvmTests
             ia.B.FooB = 4;
             ia.B.CList = new List<IC>();
             ia.B.CList.Add(CG.New<IC>((x)=>x.BarC=x.FooC=5));
-            var xml = CG.SerializeInterface(ia);
-            var obj = CG.DeserializeInterface<IA>(xml);
+            Assert.Fail();
+            //var xml = CG.SerializeInterface(ia);
+            //var obj = CG.DeserializeInterface<IA>(xml);
         }
     }
 }
