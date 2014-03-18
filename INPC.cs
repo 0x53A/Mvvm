@@ -1,5 +1,4 @@
-﻿using Mvvm.CodeGen;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
@@ -55,8 +54,8 @@ namespace Mvvm
         BindingMode mode;
 
         public INPCBinding(TSource source, Expression<Func<TSource, TProperty>> sourceSelector,
-   TDestination destination, Expression<Func<TDestination, TProperty>> destinationSelector,
-   BindingMode mode)
+            TDestination destination, Expression<Func<TDestination, TProperty>> destinationSelector,
+            BindingMode mode)
         {
             this.mode = mode;
             this.source = source;
@@ -179,14 +178,6 @@ namespace Mvvm
 
     public static class INPC
     {
-        public static T Wrap<T>(Action<T> initializer = null) where T : class
-        {
-            if (typeof(T).IsInterface)
-                return DBCGenerator.Generate<T>(initializer);
-            else
-                return VMWrapper.Wrap<T>(initializer);
-        }
-
         /// <summary>
         /// Enables a typesafe and refactorsafe way to subscribe to a INotifyPropertyChanged event.      
         /// </summary>
