@@ -8,10 +8,10 @@
     <ProjectGuid>4e6f4477-3602-412e-8b25-e818f5bca0a2</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>DuckTypingFS</RootNamespace>
-    <AssemblyName>DuckTypingFS</AssemblyName>
+    <AssemblyName>MvvmFS</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
-    <Name>DuckTypingFS</Name>
+    <Name>MvvmFS</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,8 +42,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Library1.fs" />
-    <None Include="Script.fsx" />
+    <Compile Include="Ducktyping.Internal.fs" />
+    <Compile Include="DuckTyping.fs" />
+    <Compile Include="Math3D.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

@@ -37,6 +37,36 @@ namespace Mvvm
     /// </summary>
     public static class IEnumerableExtensions
     {
+        static T[] TakeN<T>(IEnumerator<T> e, int n)
+        {
+            T[] arr = new T[n];
+            for (int i = 0; i < n; i++)
+            {
+                var ret = e.MoveNext();
+                arr[i] = e.Current;
+                if (ret == false)
+                    throw new EndOfStreamException();
+            }
+            return arr;
+        }
+
+        public static IEnumerable<T[]> SplitUp<T>(this IEnumerable<T> self, int splitSize)
+        {
+            var e = self.GetEnumerator();
+            while (true)
+            {
+                T[] arr = new T[splitSize];
+                for (int i = 0; i < splitSize; i++)
+                {
+                    var ret = e.MoveNext();
+                    if (ret == false)
+                        yield break;
+                    arr[i] = e.Current;
+                }
+                yield return arr;
+            }
+        }
+
         public static IEnumerable<T> TakeRange<T>(this IEnumerable<T> self, int startIndex, int count)
         {
             return self.Skip(startIndex).Take(count);
@@ -48,7 +78,7 @@ namespace Mvvm
                 action(item);
         }
 
-        public static IEnumerable<T2> SelectMany<T1,T2>(this IEnumerable<T1> self) where T1 : IEnumerable<T2>
+        public static IEnumerable<T2> SelectMany<T1, T2>(this IEnumerable<T1> self) where T1 : IEnumerable<T2>
         {
             var res = self.SelectMany(x => x);
             return res;

@@ -30,29 +30,29 @@ namespace MvvmTests
         }
 
         [TestMethod]
-        public void TestCreationReadWrite()
+        public void TestCreationReadWrite1()
         {
-            {
-                var val = DBCGenerator.Generate<TestInterfaceValid>();
-                Assert.IsNotNull(val);
-                Assert.IsTrue(val is INotifyPropertyChanged);
-                val.Asd1 = "Hello, World!";
-                Assert.IsTrue(val.Asd1 == "Hello, World!");
-                val.Asd2 = 55;
-                Assert.IsTrue(val.Asd2 == 55);
-            }
-
-            {
-                var val = (TestInterfaceValid)DBCGenerator.Generate(typeof(TestInterfaceValid));
-                Assert.IsNotNull(val);
-                Assert.IsTrue(val is INotifyPropertyChanged);
-                val.Asd1 = "Hello, World!";
-                Assert.IsTrue(val.Asd1 == "Hello, World!");
-                val.Asd2 = 55;
-                Assert.IsTrue(val.Asd2 == 55);
-            }
+            var val = DBCGenerator.Generate<TestInterfaceValid>();
+            Assert.IsNotNull(val);
+            Assert.IsTrue(val is INotifyPropertyChanged);
+            val.Asd1 = "Hello, World!";
+            Assert.IsTrue(val.Asd1 == "Hello, World!");
+            val.Asd2 = 55;
+            Assert.IsTrue(val.Asd2 == 55);
         }
 
+        [TestMethod]
+        public void TestCreationReadWrite2()
+        {
+            var val = (TestInterfaceValid)DBCGenerator.Generate(typeof(TestInterfaceValid));
+            Assert.IsNotNull(val);
+            Assert.IsTrue(val is INotifyPropertyChanged);
+            val.Asd1 = "Hello, World!";
+            Assert.IsTrue(val.Asd1 == "Hello, World!");
+            val.Asd2 = 55;
+            Assert.IsTrue(val.Asd2 == 55);
+        }
+        
         [TestMethod]
         public void TestCreationLazy()
         {
@@ -67,7 +67,7 @@ namespace MvvmTests
             }
 
             {
-                var val =(TestInterfaceLazy) DBCGenerator.Generate(typeof(TestInterfaceLazy));
+                var val = (TestInterfaceLazy)DBCGenerator.Generate(typeof(TestInterfaceLazy));
                 Assert.IsNotNull(val);
                 Assert.IsTrue(val is INotifyPropertyChanged);
                 Assert.IsTrue(val.FooBar != null);

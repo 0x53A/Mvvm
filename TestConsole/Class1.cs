@@ -1,4 +1,5 @@
 ﻿using Mvvm;
+using Mvvm.Codegen;
 using Mvvm.CodeGen;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace TestConsole
         static void Main(string[] args)
         {
             var asd = new Thing();
-            dynamic iAsd = DuckTypingFS.DuckTyping.Cast<IDuck>(asd);
+            dynamic iAsd = DuckTyping.Cast<IDuck>(asd);
             var foo = iAsd.Foo;
             var bar = iAsd.Bar;
         }

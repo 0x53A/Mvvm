@@ -53,6 +53,8 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -69,6 +71,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CodeGenTests.cs" />
+    <Compile Include="Math3D.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="INPCTests.cs" />
     <Compile Include="INPCBinding.cs" />
@@ -77,13 +80,13 @@
     <Compile Include="VMWrapperTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DuckTypingFS\DuckTypingFS.fsproj">
+    <ProjectReference Include="..\DuckTypingFS\MvvmFS.fsproj">
       <Project>{4e6f4477-3602-412e-8b25-e818f5bca0a2}</Project>
-      <Name>DuckTypingFS</Name>
+      <Name>MvvmFS</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MvvmFatFree.csproj">
+    <ProjectReference Include="..\Mvvm.csproj">
       <Project>{14cdf2d3-403e-4c4c-8718-990914680286}</Project>
-      <Name>MvvmFatFree</Name>
+      <Name>Mvvm</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
