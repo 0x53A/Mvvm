@@ -191,13 +191,13 @@ namespace Mvvm
         {
             Contract.Requires(expression.Body.NodeType == ExpressionType.MemberAccess);
             Contract.Requires(expression.Body is MemberExpression);
-            Contract.Requires((expression.Body as MemberExpression).Member.MemberType == MemberTypes.Property);
+            Contract.Requires((expression.Body as MemberExpression).Member is PropertyInfo);
             Contract.Requires((expression.Body as MemberExpression).Expression is ParameterExpression);
             Contract.Requires(source is INotifyPropertyChanged);
 
             var exp = expression.Body as MemberExpression;
             var prop = exp.Member as PropertyInfo;
-            var getter = prop.GetGetMethod();
+            var getter = prop.GetMethod;
             var inpc = source as INotifyPropertyChanged;
             inpc.PropertyChanged += (a, b) => { if (b.PropertyName == prop.Name) callback((TSource)a, (TProperty)getter.Invoke(a, null)); };
         }
@@ -238,7 +238,7 @@ namespace Mvvm
         {
             Contract.Requires(expression.Body.NodeType == ExpressionType.MemberAccess);
             Contract.Requires(expression.Body is MemberExpression);
-            Contract.Requires((expression.Body as MemberExpression).Member.MemberType == MemberTypes.Property);
+            Contract.Requires((expression.Body as MemberExpression).Member is PropertyInfo);
 
             var exp = expression.Body as MemberExpression;
             var prop = exp.Member as PropertyInfo;
@@ -253,7 +253,7 @@ namespace Mvvm
         {
             Contract.Requires(expression.Body.NodeType == ExpressionType.MemberAccess);
             Contract.Requires(expression.Body is MemberExpression);
-            Contract.Requires((expression.Body as MemberExpression).Member.MemberType == MemberTypes.Property);
+            Contract.Requires((expression.Body as MemberExpression).Member is PropertyInfo);
 
             return INPC<TSource>.ExtractMemberName(expression) == toMatch;
         }

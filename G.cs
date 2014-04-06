@@ -4,12 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+#if !UNIVERSAL
 using System.Windows.Controls;
 using System.Windows.Markup;
+#else
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+#endif
 
 namespace Mvvm
 {
-#if WINDOWS_PHONE
+#if WINDOWS_PHONE || UNIVERSAL
     public class GridLengthConverter
     {
         public object ConvertFrom(string s)
@@ -55,7 +60,7 @@ namespace Mvvm
 
         static void OnRowsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            var grid = obj as System.Windows.Controls.Grid;
+            var grid = obj as Grid;
             if (grid == null)
                 throw new Exception();
 
@@ -99,7 +104,7 @@ namespace Mvvm
 
         static void OnColumnsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            var grid = obj as System.Windows.Controls.Grid;
+            var grid = obj as Grid;
             if (grid == null)
                 throw new Exception();
 
@@ -168,7 +173,7 @@ namespace Mvvm
 
         static void OnAutoArrangeChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            var grid = obj as System.Windows.Controls.Grid;
+            var grid = obj as Grid;
             if (grid == null)
                 throw new Exception();
 
@@ -177,7 +182,7 @@ namespace Mvvm
 
             grid.Loaded -= grid_RoutedUpdated;
             grid.LayoutUpdated -= grid_Updated;
-#if !WINDOWS_PHONE
+#if !WINDOWS_PHONE && !UNIVERSAL
             grid.IsVisibleChanged -= grid_IsVisibleChanged;
             grid.SourceUpdated -= grid_Updated;
             grid.TargetUpdated -= grid_Updated;
@@ -187,7 +192,7 @@ namespace Mvvm
             {
                 grid.Loaded += grid_RoutedUpdated;
                 grid.LayoutUpdated += grid_Updated;
-#if !WINDOWS_PHONE
+#if !WINDOWS_PHONE && !UNIVERSAL
                 grid.IsVisibleChanged += grid_IsVisibleChanged;
                 grid.SourceUpdated += grid_Updated;
                 grid.TargetUpdated += grid_Updated;
@@ -209,7 +214,11 @@ namespace Mvvm
                 RecalculateGrid(sender as Grid);
         }
 
+#if !UNIVERSAL
         static void grid_Updated(object sender, EventArgs e)
+#else
+        static void grid_Updated(object sender, object e)
+#endif
         {
             if (sender != null && sender is Grid)
                 RecalculateGrid(sender as Grid);
