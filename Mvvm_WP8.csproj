@@ -84,12 +84,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AsyncLock.cs" />
+    <Compile Include="CodeGen\CG.cs" />
+    <Compile Include="CodeGen\TypeOverrideAttribute.cs" />
     <Compile Include="EventToCommand.cs" />
     <Compile Include="EventTriggerCommand.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="G.cs" />
     <Compile Include="IEventTriggerCommand.cs" />
     <Compile Include="INPC.cs" />
+    <Compile Include="InterfaceSerialization.cs" />
     <Compile Include="ObservableCollectionExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RelayCommand.cs" />

@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 
 namespace Mvvm.CodeGen
 {
-    [AttributeUsage(AttributeTargets.Interface| AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    sealed class GeneratedTypeNameAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public class TypeOverrideAttribute : Attribute
     {
         readonly string name;
 
-        // This is a positional argument
-        public GeneratedTypeNameAttribute(string name)
+        public TypeOverrideAttribute(string name = null)
         {
             this.name = name;
         }
