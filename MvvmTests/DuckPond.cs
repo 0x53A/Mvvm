@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Mvvm.CodeGen;
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Mvvm.Codegen;
 
 namespace MvvmTests
 {
@@ -23,7 +25,7 @@ namespace MvvmTests
         public void TestDucks()
         {
             var asd = new Thing();
-            var iAsd = DuckTypingFS.DuckTyping.Cast<IDuck>(asd);
+            var iAsd = DuckTyping.Cast<IDuck>(asd);
             var foo = iAsd.Foo;
             var bar = iAsd.Bar;
         }
@@ -38,7 +40,7 @@ namespace MvvmTests
         public void TestAnonymousDuck()
         {
             var thing = new { Foo = 5, Bar = 66 };
-            IAnonDuck iDuck = DuckTypingFS.DuckTyping.Cast<IAnonDuck>(thing);
+            IAnonDuck iDuck = DuckTyping.Cast<IAnonDuck>(thing);
             var foo = iDuck.Foo;
             var bar = iDuck.Bar;
             Assert.AreEqual(thing.Foo, foo);

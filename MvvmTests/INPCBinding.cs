@@ -5,7 +5,6 @@ using Mvvm.CodeGen;
 
 namespace MvvmTests
 {
-
     public interface IStuff
     {
         IStuff2 Foo { get; set; }
