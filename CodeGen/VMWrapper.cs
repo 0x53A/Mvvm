@@ -123,10 +123,7 @@ namespace Mvvm.CodeGen
 
             bool hasINPC = targetType.GetInterfaces().Contains(typeof(INotifyPropertyChanged));
             var interfacesToImplement = hasINPC ? Type.EmptyTypes : new[] { typeof(INotifyPropertyChanged) };
-            var attr = targetType.GetCustomAttribute<TypeOverrideAttribute>();
-            var typeName = attr != null ? attr.TypeName : targetType.FullName;
-            typeName = typeName ?? targetType.FullName;
-            var tb = mb.DefineType(typeName, CodeGenInternal.GeneratedTypeAttributes, targetType, interfacesToImplement);
+            var tb = mb.DefineType("dbc_{0}".FormatWith(targetType.FullName), CodeGenInternal.GeneratedTypeAttributes, targetType, interfacesToImplement);
 
             var constructor = tb.DefineConstructor(CodeGenInternal.ConstructorAttributes, CallingConventions.HasThis, null);
             var ctorIL = constructor.GetILGenerator();
