@@ -148,8 +148,9 @@ namespace Mvvm.CodeGen
             else
                 mb = ab.DefineDynamicModule("generated");
 
-            var attr = targetType.GetCustomAttribute<GeneratedTypeNameAttribute>();
-            var name = attr != null ? attr.TypeName : targetType.FullName;
+            var attr = targetType.GetCustomAttribute<TypeOverrideAttribute>();
+            var name = attr != null ? attr.TypeName : targetType.Namespace;
+            name = name ?? targetType.FullName;
             var tb = mb.DefineType(name, CodeGenInternal.GeneratedTypeAttributes, null, new[] { targetType, typeof(INotifyPropertyChanged) });
 
             var constructor = tb.DefineConstructor(CodeGenInternal.ConstructorAttributes, CallingConventions.HasThis, null);
