@@ -46,7 +46,7 @@ namespace Mvvm.CodeGen
         }
         public static void Copy<TCopy>(object source, object destination)
         {
-            Contract.Requires(typeof(TCopy).IsInterface);
+            Contract.Requires(typeof(TCopy).GetTypeInfo().IsInterface);
             Contract.Requires(source != null);
             Contract.Requires(destination != null);
         }

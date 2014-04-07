@@ -47,7 +47,7 @@ namespace Mvvm.CodeGen
     public static class InterfaceCopy
     {
         static object _lock = new object();
-        static Dictionary<CopyContext.CKey, CopyContext> _contextCache;
+        static Dictionary<CopyContext.CKey, CopyContext> _contextCache = new Dictionary<CopyContext.CKey,CopyContext>();
 
         public static void Copy(Type tInterface, object source, object destination)
         {
