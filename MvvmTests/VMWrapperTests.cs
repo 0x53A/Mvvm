@@ -9,6 +9,7 @@ namespace MvvmTests
     [TestClass]
     public class VMWrapperTests
     {
+        [TypeOverride]
         public abstract class VmWithInpc : ViewModelBase
         {
             [Inpc]

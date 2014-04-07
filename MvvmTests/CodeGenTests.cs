@@ -17,12 +17,14 @@ namespace MvvmTests
             }
         }
 
+        [TypeOverride]
         public interface TestInterfaceValid
         {
             string Asd1 { get; set; }
             int Asd2 { get; set; }
         }
 
+        [TypeOverride]
         public interface TestInterfaceLazy
         {
             List<int> FooBar { get; }

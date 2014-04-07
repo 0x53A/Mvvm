@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvvm_WP8", "Mvvm_WP8.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvvm_Universal", "Mvvm_Universal.csproj", "{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeMapper", "TypeMapper\TypeMapper.csproj", "{57DACB07-C97A-4660-B15C-01A0609BFD9F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,14 @@ Global
 		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}.Release|ARM.ActiveCfg = Release|Any CPU
 		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}.Release|x86.ActiveCfg = Release|Any CPU
+		{57DACB07-C97A-4660-B15C-01A0609BFD9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57DACB07-C97A-4660-B15C-01A0609BFD9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57DACB07-C97A-4660-B15C-01A0609BFD9F}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{57DACB07-C97A-4660-B15C-01A0609BFD9F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{57DACB07-C97A-4660-B15C-01A0609BFD9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57DACB07-C97A-4660-B15C-01A0609BFD9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57DACB07-C97A-4660-B15C-01A0609BFD9F}.Release|ARM.ActiveCfg = Release|Any CPU
+		{57DACB07-C97A-4660-B15C-01A0609BFD9F}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
