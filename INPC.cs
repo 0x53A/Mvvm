@@ -178,6 +178,12 @@ namespace Mvvm
 
     public static class INPC
     {
+        
+        public static void Subscribe<TSource, TProperty>(TSource source, Expression<Func<TSource, TProperty>> expression, Action callback)
+        {
+            Subscribe(source, expression, (aa, bb) => callback());
+        }
+
         /// <summary>
         /// Enables a typesafe and refactorsafe way to subscribe to a INotifyPropertyChanged event.      
         /// </summary>

@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 using Mvvm;
 using System.IO;
 using System.Reflection;
+using System.Diagnostics.Contracts;
 
 namespace Mvvm.CodeGen
 {
@@ -19,6 +20,13 @@ namespace Mvvm.CodeGen
                 return DBCGenerator.Generate<T>(init);
             else
                 return VMWrapper.Wrap<T>(init);
+        }
+
+        public static void Copy<TCopy>(object source, object destination)
+        {
+            Contract.Requires(typeof(TCopy).IsInterface);
+            Contract.Requires(source != null);
+            Contract.Requires(destination != null);
         }
 
     //    public static string SerializeInterface<T>(T obj)
