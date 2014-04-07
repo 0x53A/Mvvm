@@ -4,12 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+#if !UNIVERSAL
 using System.Windows.Controls;
 using System.Windows.Markup;
+#else
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+#endif
 
 namespace Mvvm
 {
-#if WINDOWS_PHONE
+#if WINDOWS_PHONE || UNIVERSAL
     public class GridLengthConverter
     {
         public object ConvertFrom(string s)
@@ -35,6 +40,74 @@ namespace Mvvm
         }
     }
 #endif
+
+    public class GridPositioning
+    {
+        public struct Position
+        {
+            public int? X;
+            public int? Y;
+            public int Width;
+            public int Height;
+        }
+
+        public struct PointI
+        {
+            public int X;
+            public int Y;
+        }
+
+        int nextColumn = 0;
+        int nextRow = 0;
+        Grid<bool> usedCells = new Grid<bool>();
+
+        int width;
+        int height;
+
+        public GridPositioning(int width, int height)
+        {
+            this.width = width;
+            this.height = height;
+        }
+
+        bool MoveNext()
+        {
+            nextColumn += 1;
+            if (nextColumn >= width)
+            {
+                nextColumn = 0;
+                nextRow += 1;
+            }
+            if (nextRow >= height)
+                return false;
+            if (usedCells[nextRow, nextColumn])
+                return MoveNext();
+            else
+                return true;
+        }
+
+        public PointI Get(Position preset)
+        {
+            PointI ret = new PointI() { X = 0, Y = 0 };
+
+            if (preset.Y.HasValue)
+            {
+                nextRow = preset.Y.Value;
+                nextColumn = 0;
+            }
+            if (preset.X.HasValue)
+                nextColumn = preset.X.Value;
+
+            ret = new PointI() { X = nextColumn, Y = nextRow };
+
+            for (int x = 0; x < preset.Width; x++)
+                for (int y = 0; y < preset.Height; y++)
+                    usedCells[nextColumn + x, nextRow + y] = true;
+            MoveNext();
+            return ret;
+        }
+    }
+
     public class G
     {
         /**********/
@@ -55,7 +128,7 @@ namespace Mvvm
 
         static void OnRowsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            var grid = obj as System.Windows.Controls.Grid;
+            var grid = obj as Grid;
             if (grid == null)
                 throw new Exception();
 
@@ -99,7 +172,7 @@ namespace Mvvm
 
         static void OnColumnsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            var grid = obj as System.Windows.Controls.Grid;
+            var grid = obj as Grid;
             if (grid == null)
                 throw new Exception();
 
@@ -139,6 +212,7 @@ namespace Mvvm
         }
 
         static Dictionary<Grid, Tuple<int, int, int>> gridValues = new Dictionary<Grid, Tuple<int, int, int>>();
+        static Dictionary<UIElement, GridPositioning.Position> presetValues = new Dictionary<UIElement, GridPositioning.Position>();
 
         static void RecalculateGrid(Grid grid)
         {
@@ -153,22 +227,43 @@ namespace Mvvm
             var tuple = Tuple.Create(rows, columns, nChildren);
             if ((!gridValues.ContainsKey(grid)) || gridValues[grid] != tuple)
             {
+                gridValues[grid] = tuple;
+
+                GridPositioning posAlgo = new GridPositioning(columns, rows);
                 for (int i = 0; i < nChildren; i++)
                 {
-                    var column = i % columns;
-                    var row = i / columns;
-                    var child = grid.Children[i];
+                    var child = (FrameworkElement)grid.Children[i];
+                    GridPositioning.Position preset;
+                    if (presetValues.ContainsKey(child))
+                        preset = presetValues[child];
+                    else
+                    {
+                        int? column = Grid.GetColumn(child);
+                        if (column < 0)
+                            column = null;
+                        int? row = Grid.GetRow(child);
+                        if (row < 0)
+                            row = null;
+                        int columnSpan = Grid.GetColumnSpan(child);
+                        if (columnSpan <= 0)
+                            columnSpan = 1;
+                        int rowSpan = Grid.GetRowSpan(child);
+                        if (rowSpan <= 0)
+                            rowSpan = 1;
+                        preset = new GridPositioning.Position() { X = column, Y = row, Width = columnSpan, Height = rowSpan };
+                        presetValues[child] = preset;
+                    }
 
-                    Grid.SetRow((FrameworkElement) child, row);
-                    Grid.SetColumn((FrameworkElement)child, column);
+                    var pos = posAlgo.Get(preset);
+                    Grid.SetColumn((FrameworkElement)child, pos.X);
+                    Grid.SetRow((FrameworkElement)child, pos.Y);
                 }
-                gridValues[grid] = tuple;
             }
         }
 
         static void OnAutoArrangeChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            var grid = obj as System.Windows.Controls.Grid;
+            var grid = obj as Grid;
             if (grid == null)
                 throw new Exception();
 
@@ -177,7 +272,7 @@ namespace Mvvm
 
             grid.Loaded -= grid_RoutedUpdated;
             grid.LayoutUpdated -= grid_Updated;
-#if !WINDOWS_PHONE
+#if !WINDOWS_PHONE && !UNIVERSAL
             grid.IsVisibleChanged -= grid_IsVisibleChanged;
             grid.SourceUpdated -= grid_Updated;
             grid.TargetUpdated -= grid_Updated;
@@ -187,7 +282,7 @@ namespace Mvvm
             {
                 grid.Loaded += grid_RoutedUpdated;
                 grid.LayoutUpdated += grid_Updated;
-#if !WINDOWS_PHONE
+#if !WINDOWS_PHONE && !UNIVERSAL
                 grid.IsVisibleChanged += grid_IsVisibleChanged;
                 grid.SourceUpdated += grid_Updated;
                 grid.TargetUpdated += grid_Updated;
@@ -209,7 +304,11 @@ namespace Mvvm
                 RecalculateGrid(sender as Grid);
         }
 
+#if !UNIVERSAL
         static void grid_Updated(object sender, EventArgs e)
+#else
+        static void grid_Updated(object sender, object e)
+#endif
         {
             if (sender != null && sender is Grid)
                 RecalculateGrid(sender as Grid);

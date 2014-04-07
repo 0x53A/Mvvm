@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
+VisualStudioVersion = 12.0.30324.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvvm", "Mvvm.csproj", "{14CDF2D3-403E-4C4C-8718-990914680286}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MvvmFS", "DuckTypingFS\MvvmFS.fsproj", "{4E6F4477-3602-412E-8B25-E818F5BCA0A2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvvm_WP8", "Mvvm_WP8.csproj", "{DCF43062-EA1B-4F07-B31A-DC587A3A6A97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvvm_Universal", "Mvvm_Universal.csproj", "{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +85,14 @@ Global
 		{DCF43062-EA1B-4F07-B31A-DC587A3A6A97}.Release|ARM.Build.0 = Release|ARM
 		{DCF43062-EA1B-4F07-B31A-DC587A3A6A97}.Release|x86.ActiveCfg = Release|x86
 		{DCF43062-EA1B-4F07-B31A-DC587A3A6A97}.Release|x86.Build.0 = Release|x86
+		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}.Release|ARM.ActiveCfg = Release|Any CPU
+		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
