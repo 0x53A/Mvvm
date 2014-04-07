@@ -11,6 +11,7 @@ using System.Xml.Serialization;
 using Mvvm;
 using System.IO;
 using System.Reflection;
+using System.Diagnostics.Contracts;
 using System.Diagnostics;
 
 namespace Mvvm.CodeGen
@@ -43,5 +44,12 @@ namespace Mvvm.CodeGen
             throw new NotImplementedException();
 #endif
         }
+        public static void Copy<TCopy>(object source, object destination)
+        {
+            Contract.Requires(typeof(TCopy).IsInterface);
+            Contract.Requires(source != null);
+            Contract.Requires(destination != null);
+        }
+
     }
 }

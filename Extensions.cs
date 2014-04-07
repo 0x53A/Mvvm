@@ -114,7 +114,7 @@ namespace Mvvm
 
             int IEqualityComparer<T>.GetHashCode(T obj)
             {
-                return obj.GetHashCode();
+                return 0;
             }
         }
 
