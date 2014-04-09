@@ -9,16 +9,12 @@ namespace Mvvm.CodeGen
     [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public class TypeOverrideAttribute : Attribute
     {
-        readonly string name;
-
-        public TypeOverrideAttribute(string name = null)
+        public TypeOverrideAttribute()
         {
-            this.name = name;
         }
 
-        public string TypeName
-        {
-            get { return name; }
-        }
+        public bool OverrideAllMembers { get; set; }
+
+        public string TypeName { get; set; }
     }
 }

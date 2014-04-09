@@ -28,7 +28,7 @@ namespace Mvvm.CodeGen
             else
                 return VMWrapper.Wrap<T>(init);
 #else
-            throw new NotImplementedException();
+            return CompileTimeMapping.New<T>(init);
 #endif
         }
 
@@ -41,9 +41,10 @@ namespace Mvvm.CodeGen
             else
                 return VMWrapper.Map(type);
 #else
-            throw new NotImplementedException();
+            return CompileTimeMapping.Map(type);
 #endif
         }
+
         public static void Copy<TCopy>(object source, object destination)
         {
             Contract.Requires(typeof(TCopy).GetTypeInfo().IsInterface);

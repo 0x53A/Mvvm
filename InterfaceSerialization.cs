@@ -39,8 +39,8 @@ namespace Mvvm
         {
             if (mappings.ContainsKey(type))
                 return mappings[type];
-            
-            lock(_lock)
+
+            lock (_lock)
             {
                 if (mappings.ContainsKey(type))
                     return mappings[type];
@@ -72,6 +72,11 @@ namespace Mvvm
             DataContractSerializer serializer = new DataContractSerializer(typeof(T), overridden);
             using (var xReader = XmlReader.Create(new StringReader(s)))
                 return (T)serializer.ReadObject(xReader);
+        }
+
+        public static Type[] KnownTypesOf<T>()
+        {
+            return GetMapping(typeof(T));
         }
     }
 }
