@@ -80,7 +80,7 @@ namespace Mvvm
             }
             if (nextRow >= height)
                 return false;
-            if (usedCells[nextRow, nextColumn])
+            if (usedCells[nextColumn, nextRow])
                 return MoveNext();
             else
                 return true;
@@ -250,6 +250,12 @@ namespace Mvvm
                         int rowSpan = Grid.GetRowSpan(child);
                         if (rowSpan <= 0)
                             rowSpan = 1;
+
+                        //HACK
+                        column = null;
+                        row = null;
+                        //HACK
+
                         preset = new GridPositioning.Position() { X = column, Y = row, Width = columnSpan, Height = rowSpan };
                         presetValues[child] = preset;
                     }
