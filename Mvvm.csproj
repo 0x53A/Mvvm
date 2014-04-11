@@ -67,9 +67,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyReference.cs" />
     <Compile Include="AsyncLock.cs" />
     <Compile Include="CodeGen\CG.cs" />
     <Compile Include="CodeGen\DBCGenerator.cs" />
+    <Compile Include="CodeGen\InpcAttribute.cs" />
     <Compile Include="CodeGen\TypeOverrideAttribute.cs" />
     <Compile Include="CodeGen\GeneratedTypeNameAttribute.cs" />
     <Compile Include="CodeGen\InterfaceCopy.cs" />

@@ -106,8 +106,8 @@ namespace TypeMapper
             Func<PropertyInfo, bool> InpcFilter = null;
             if (isAbstract)
             {
-                lazyFilter = p => p.GetCustomAttributesData().Any(a => a.AttributeType.Name == typeof(LazyAttribute).Name);
-                InpcFilter = p => p.GetCustomAttributesData().Any(a => a.AttributeType.Name == typeof(InpcAttribute).Name);
+                lazyFilter = p => (p.GetMethod != null && p.SetMethod == null && p.GetMethod.IsAbstract) || p.GetCustomAttributesData().Any(a => a.AttributeType.Name == typeof(LazyAttribute).Name);
+                InpcFilter = p => (p.GetMethod != null && p.SetMethod != null && p.GetMethod.IsAbstract && p.SetMethod.IsAbstract) || p.GetCustomAttributesData().Any(a => a.AttributeType.Name == typeof(InpcAttribute).Name);
             }
             else
             {
@@ -165,9 +165,7 @@ namespace TypeMapper
 
                 type.Members.Add(OnPropertyChanged);
                 foreach (var p in inpc)
-                {
                     ImplementProperty(type, p, isAbstract, isLazy: false);
-                }
             }
             nspace.Types.Add(type);
             unit.Namespaces.Add(nspace);
@@ -175,7 +173,6 @@ namespace TypeMapper
 
         static void Main(string[] args)
         {
-#if DEBUG
             if (args.Length < 2)
                 Environment.Exit(-1);
 
@@ -184,11 +181,6 @@ namespace TypeMapper
                 Environment.Exit(-1);
 
             var outPath = args[1];
-#else
-            var asmPath = @"C:\_D\GIT\_WORK\libs\MvvmFatFree\MvvmTests\bin\Debug\MvvmTests.dll";
-            var outPath = @"c:\_d\out.cs";
-#endif
-            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += CurrentDomain_ReflectionOnlyAssemblyResolve;
 
             var asm = Assembly.LoadFrom(asmPath);
             var types = asm.GetTypes().Where(t => t.GetCustomAttributesData()
@@ -208,37 +200,6 @@ namespace TypeMapper
             using (var writer = new StreamWriter(outPath))
                 codeDom.GenerateCodeFromCompileUnit(compileUnit, writer, new CodeGeneratorOptions());
             Console.ReadLine();
-        }
-
-        static Assembly CurrentDomain_ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            Exception lastEx = null; ;
-            try
-            {
-                return Assembly.ReflectionOnlyLoad(args.Name);
-            }
-            catch
-            {
-                var dllName = "{0}.dll".FormatWith(args.Name.Split(',').First());
-                var paths = new List<string>();
-                paths.Add(@"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.6");
-
-                var basePath = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.6\Profile\Profile32";
-                foreach (var d in Directory.GetDirectories(basePath))
-                    paths.Add(d);
-                foreach (var p in paths)
-                {
-                    try
-                    {
-                        return Assembly.ReflectionOnlyLoad(Path.Combine(p, dllName));
-                    }
-                    catch (Exception ex)
-                    {
-                        lastEx = ex;
-                    }
-                }
-            }
-            throw lastEx;
         }
     }
 }

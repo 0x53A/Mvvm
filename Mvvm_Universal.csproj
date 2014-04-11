@@ -46,6 +46,7 @@
     <Compile Include="CodeGen\CG.cs" />
     <Compile Include="CodeGen\CompileTimeMapping.cs" />
     <Compile Include="CodeGen\InpcAttribute.cs" />
+    <Compile Include="CodeGen\InterfaceCopy.cs" />
     <Compile Include="CodeGen\TypeOverrideAttribute.cs" />
     <Compile Include="EventToCommand.cs" />
     <Compile Include="EventTriggerCommand.cs" />
