@@ -50,7 +50,7 @@ namespace MvvmTests
         [TestMethod]
         public void TestVMWrapperWithInpc()
         {
-            var obj = VMWrapper.Wrap<VmWithInpc>();
+            var obj = CG.New<VmWithInpc>();
             int nFoo = 0;
             int nBar = 0;
             int nAsd = 0;
@@ -84,7 +84,7 @@ namespace MvvmTests
         [TestMethod]
         public void TestVMWrapperWithoutInpc()
         {
-            var obj = VMWrapper.Wrap<VmWithoutInpc>();
+            var obj = CG.New<VmWithoutInpc>();
             int nFoo = 0;
             int nBar = 0;
             INPC.Subscribe(obj, o => o.Foo, (a, b) => nFoo += 1);

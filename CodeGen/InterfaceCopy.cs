@@ -9,13 +9,14 @@ namespace Mvvm.CodeGen
 {
     public class InterfaceCopyException : Exception
     {
-        public InterfaceCopyException(string message, Exception innerException) : base(message, innerException)
+        public InterfaceCopyException(string message, Exception innerException)
+            : base(message, innerException)
         {
 
         }
     }
 
-    public class CopyContext
+    internal class CopyContext
     {
         public CKey Key { get; private set; }
         public List<MethodInfo> Getters { get; private set; }
@@ -47,7 +48,7 @@ namespace Mvvm.CodeGen
     public static class InterfaceCopy
     {
         static object _lock = new object();
-        static Dictionary<CopyContext.CKey, CopyContext> _contextCache = new Dictionary<CopyContext.CKey,CopyContext>();
+        static Dictionary<CopyContext.CKey, CopyContext> _contextCache = new Dictionary<CopyContext.CKey, CopyContext>();
 
         public static void Copy(Type tInterface, object source, object destination)
         {
@@ -71,7 +72,7 @@ namespace Mvvm.CodeGen
             DoCopy(context, source, destination);
         }
 
-        public static CopyContext CreateContext(CopyContext.CKey key)
+        internal static CopyContext CreateContext(CopyContext.CKey key)
         {
             try
             {
@@ -95,7 +96,7 @@ namespace Mvvm.CodeGen
             }
         }
 
-        public static void DoCopy(CopyContext context, object source, object destination)
+        internal static void DoCopy(CopyContext context, object source, object destination)
         {
             try
             {

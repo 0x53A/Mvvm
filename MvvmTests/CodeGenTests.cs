@@ -34,7 +34,7 @@ namespace MvvmTests
         [TestMethod]
         public void TestCreationReadWrite1()
         {
-            var val = DBCGenerator.Generate<TestInterfaceValid>();
+            var val = CG.New<TestInterfaceValid>();
             Assert.IsNotNull(val);
             Assert.IsTrue(val is INotifyPropertyChanged);
             val.Asd1 = "Hello, World!";
@@ -46,7 +46,7 @@ namespace MvvmTests
         [TestMethod]
         public void TestCreationReadWrite2()
         {
-            var val = (TestInterfaceValid)DBCGenerator.Generate(typeof(TestInterfaceValid));
+            var val = CG.New<TestInterfaceValid>();
             Assert.IsNotNull(val);
             Assert.IsTrue(val is INotifyPropertyChanged);
             val.Asd1 = "Hello, World!";
@@ -59,7 +59,7 @@ namespace MvvmTests
         public void TestCreationLazy()
         {
             {
-                var val = DBCGenerator.Generate<TestInterfaceLazy>();
+                var val = CG.New<TestInterfaceLazy>();
                 Assert.IsNotNull(val);
                 Assert.IsTrue(val is INotifyPropertyChanged);
                 Assert.IsTrue(val.FooBar != null);
@@ -69,7 +69,7 @@ namespace MvvmTests
             }
 
             {
-                var val = (TestInterfaceLazy)DBCGenerator.Generate(typeof(TestInterfaceLazy));
+                var val = CG.New<TestInterfaceLazy>();
                 Assert.IsNotNull(val);
                 Assert.IsTrue(val is INotifyPropertyChanged);
                 Assert.IsTrue(val.FooBar != null);
@@ -98,7 +98,7 @@ namespace MvvmTests
         {
             try
             {
-                var val = DBCGenerator.Generate<TestInterfaceLazyInvalid>();
+                var val = CG.New<TestInterfaceLazyInvalid>();
                 Assert.Fail();
             }
             catch { }
@@ -109,7 +109,7 @@ namespace MvvmTests
         {
             try
             {
-                var val = DBCGenerator.Generate<TestInterfaceInvalid>();
+                var val = CG.New<TestInterfaceInvalid>();
                 Assert.Fail();
             }
             catch { }

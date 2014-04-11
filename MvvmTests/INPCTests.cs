@@ -19,7 +19,7 @@ namespace MvvmTests
         {
             int nFoo = 0;
             int nBar = 0;
-            var obj = DBCGenerator.Generate<IASD>(o=>o.Foo = "");
+            var obj = CG.New<IASD>(o=>o.Foo = "");
             INPC.Subscribe(obj, o => o.Foo, (a, b) => { nFoo += 1; });
 
             Assert.AreEqual(nFoo, 0);

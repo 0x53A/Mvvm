@@ -26,14 +26,14 @@ namespace MvvmTests
         [TestMethod]
         public void TestBinding()
         {
-            var source = DBCGenerator.Generate<IStuff>();
-            var destination = DBCGenerator.Generate<IStuff>();
+            var source = CG.New<IStuff>();
+            var destination = CG.New<IStuff>();
 
-            source.Foo = DBCGenerator.Generate<IStuff2>();
-            destination.Foo = DBCGenerator.Generate<IStuff2>();
+            source.Foo = CG.New<IStuff2>();
+            destination.Foo = CG.New<IStuff2>();
 
-            source.Foo.Bar = DBCGenerator.Generate<IStuff3>();
-            destination.Foo.Bar = DBCGenerator.Generate<IStuff3>();
+            source.Foo.Bar = CG.New<IStuff3>();
+            destination.Foo.Bar = CG.New<IStuff3>();
 
             var binding = INPC.Bind(source, _ => _.Foo.Bar.FooBar, destination, _ => _.Foo.Bar.FooBar, BindingMode.TwoWay);
             source.Foo.Bar.FooBar = "Hello, World!";

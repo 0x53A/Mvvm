@@ -133,6 +133,23 @@ namespace Mvvm
         {
             return ienum.ToDictionary(x => x.Key, x => x.Value);
         }
+
+        public static TVal GetFromKeyOrCreate<TKey, TVal, TLock>(this IDictionary<TKey, TVal> dict, TKey key, TLock _lock, Func<TVal> creator) where TLock : class
+        {
+            if (dict.ContainsKey(key))
+                return dict[key];
+            else
+            {
+                lock(_lock)
+                {
+                    if (dict.ContainsKey(key))
+                        return dict[key];
+                    var newVal = creator();
+                    dict[key] = newVal;
+                    return newVal;
+                }
+            }
+        }
     }
 
     /// <summary>

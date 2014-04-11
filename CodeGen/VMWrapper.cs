@@ -9,22 +9,30 @@ using System.Threading.Tasks;
 
 namespace Mvvm.CodeGen
 {
-    public static class VMWrapper
+    /// <summary>
+    /// Notifies the VMWrapper that this Property should be overridden and implement INotifyPropertyChanged.
+    /// It can only be applied to properties with getter and setter
+    /// </summary>
+    public class InpcAttribute : Attribute
+    {
+
+    }
+
+    /// <summary>
+    /// Notifies the VMWrapper that this property should be overridden and implemented using Lazy initialization.
+    /// It can only be applied to get-only properties
+    /// </summary>
+    public class LazyAttribute : Attribute
+    {
+
+    }
+
+    internal static class VMWrapper
     {
         static IDictionary<Type, Type> mappedTypes = new Dictionary<Type, Type>();
+        static object _lock = new object();
 
-        /// <summary>
-        /// DO NOT USE
-        /// </summary>
-        public static void ClearCache()
-        {
-            lock (mappedTypes)
-            {
-                mappedTypes.Clear();
-            }
-        }
-
-        public static Type Map<T>()
+        internal static Type Map<T>()
         {
             //TODO: Contract.Requires
 
@@ -32,35 +40,14 @@ namespace Mvvm.CodeGen
             return Map(targetType);
         }
 
-        public static Type Map(Type targetType)
+        internal static Type Map(Type targetType)
         {
             //TODO: Contract.Requires
 
-            Type mappedType;
-
-            if (mappedTypes.ContainsKey(targetType))
-                mappedType = mappedTypes[targetType];
-            else
-            {
-                lock (mappedTypes)
-                {
-                    //it may have been added between the first check and the lock....
-                    if (mappedTypes.ContainsKey(targetType))
-                    {
-                        mappedType = mappedTypes[targetType];
-                    }
-                    else
-                    {
-                        mappedType = CreateClassMap(targetType);
-                        mappedTypes.Add(targetType, mappedType);
-                    }
-                }
-            }
-
-            return mappedType;
+            return mappedTypes.GetFromKeyOrCreate(targetType, _lock, () => CreateClassMap(targetType));
         }
 
-        public static T Wrap<T>(Action<T> initializer = null)
+        internal static T Wrap<T>(Action<T> initializer = null)
         {
             //TODO: Contract.Requires
 
@@ -71,7 +58,7 @@ namespace Mvvm.CodeGen
             return obj;
         }
 
-        public static object Wrap(Type targetType)
+        internal static object Wrap(Type targetType)
         {
             //TODO: Contract.Requires
 

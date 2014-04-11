@@ -51,6 +51,5 @@ namespace Mvvm.CodeGen
             Contract.Requires(source != null);
             Contract.Requires(destination != null);
         }
-
     }
 }

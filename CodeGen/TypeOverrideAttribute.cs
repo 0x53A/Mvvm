@@ -13,8 +13,6 @@ namespace Mvvm.CodeGen
         {
         }
 
-        public bool OverrideAllMembers { get; set; }
-
         public string TypeName { get; set; }
     }
 }
