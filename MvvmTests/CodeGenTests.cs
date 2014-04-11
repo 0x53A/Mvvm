@@ -9,6 +9,7 @@ namespace MvvmTests
     [TestClass]
     public class CodeGenTests
     {
+        [TypeOverride]
         public class ClassWithoutStandardConstructor
         {
             public ClassWithoutStandardConstructor(string someArgument)
@@ -81,11 +82,13 @@ namespace MvvmTests
 
         /* Test Failure */
 
+        [TypeOverride]
         public interface TestInterfaceLazyInvalid
         {
             ClassWithoutStandardConstructor Foo { get; }
         }
 
+        [TypeOverride]
         public interface TestInterfaceInvalid
         {
             void Foo();

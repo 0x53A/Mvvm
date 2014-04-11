@@ -37,23 +37,14 @@ namespace Mvvm
 
         static Type[] GetMapping(Type type)
         {
-            if (mappings.ContainsKey(type))
-                return mappings[type];
-
-            lock (_lock)
+            return mappings.GetFromKeyOrCreate(type, _lock, () =>
             {
-                if (mappings.ContainsKey(type))
-                    return mappings[type];
-
                 var knownTypes = new List<Type>();
                 EnumerateAllTypes(type, knownTypes);
                 var overridden = knownTypes.Where(t => t.GetTypeInfo().GetCustomAttribute<TypeOverrideAttribute>() != null)
                                            .Select(t => CG.Map(t)).ToArray();
-
-                mappings[type] = overridden;
-
                 return overridden;
-            }
+            });
         }
 
         public static string Serialize<T>(T o)
@@ -70,7 +61,8 @@ namespace Mvvm
         {
             var overridden = GetMapping(typeof(T));
             DataContractSerializer serializer = new DataContractSerializer(typeof(T), overridden);
-            using (var xReader = XmlReader.Create(new StringReader(s)))
+            using (var sr = new StringReader(s))
+            using (var xReader = XmlReader.Create(sr))
                 return (T)serializer.ReadObject(xReader);
         }
 

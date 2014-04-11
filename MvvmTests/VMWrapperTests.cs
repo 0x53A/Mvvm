@@ -30,6 +30,7 @@ namespace MvvmTests
             }
         }
 
+        [TypeOverride]
         public abstract class VmWithoutInpc
         {
             [Inpc]

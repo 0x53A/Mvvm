@@ -18,6 +18,11 @@ namespace Mvvm
         {
             stream.Write(buffer, 0, buffer.Length);
         }
+
+        public static int Read(this Stream stream, byte[] buffer)
+        {
+            return stream.Read(buffer, 0, buffer.Length);
+        }
     }
 
     /// <summary>
@@ -140,7 +145,7 @@ namespace Mvvm
                 return dict[key];
             else
             {
-                lock(_lock)
+                lock (_lock)
                 {
                     if (dict.ContainsKey(key))
                         return dict[key];

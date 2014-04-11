@@ -57,18 +57,7 @@ namespace Mvvm.CodeGen
 
             var key = new CopyContext.CKey(tInterface, tSource, tDestination);
 
-            CopyContext context;
-            lock (_lock)
-            {
-                if (_contextCache.ContainsKey(key))
-                    context = _contextCache[key];
-                else
-                {
-                    context = CreateContext(key);
-                    _contextCache[key] = context;
-                }
-            }
-
+            var context = _contextCache.GetFromKeyOrCreate(key, _lock, ()=>CreateContext(key));
             DoCopy(context, source, destination);
         }
 

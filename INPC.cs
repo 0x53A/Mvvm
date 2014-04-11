@@ -14,7 +14,6 @@ using System.Threading.Tasks;
  * These methods are in the non-generic INPC class.
  * In other cases, the type of the source object must be supplied.
  * These methods are in INPC<T>.
- * 
  * */
 
 namespace Mvvm
@@ -178,7 +177,6 @@ namespace Mvvm
 
     public static class INPC
     {
-        
         public static void Subscribe<TSource, TProperty>(TSource source, Expression<Func<TSource, TProperty>> expression, Action callback)
         {
             Subscribe(source, expression, (aa, bb) => callback());

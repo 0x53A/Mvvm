@@ -8,6 +8,7 @@ namespace MvvmTests
     [TestClass]
     public class INPCTests
     {
+        [TypeOverride]
         public interface IASD
         {
             string Foo { get; set; }

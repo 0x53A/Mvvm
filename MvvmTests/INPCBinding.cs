@@ -5,16 +5,19 @@ using Mvvm.CodeGen;
 
 namespace MvvmTests
 {
+    [TypeOverride]
     public interface IStuff
     {
         IStuff2 Foo { get; set; }
     }
 
+    [TypeOverride]
     public interface IStuff2
     {
         IStuff3 Bar { get; set; }
     }
 
+    [TypeOverride]
     public interface IStuff3
     {
         string FooBar { get; set; }
