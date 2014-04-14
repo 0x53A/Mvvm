@@ -100,6 +100,17 @@ namespace TypeMapper
             type.TypeAttributes = TypeAttributes.Public;
             type.BaseTypes.Add(t);
 
+            var ctors = t.GetConstructors();
+            foreach (var ctor in ctors)
+            {
+                var args = ctor.GetParameters();
+                var _ctor = new CodeConstructor();
+                _ctor.Attributes = MemberAttributes.Public;
+                _ctor.Parameters.AddRange(args.Select(a => new CodeParameterDeclarationExpression(a.ParameterType, a.Name)).ToArray());
+                _ctor.BaseConstructorArgs.AddRange(args.Select(a => new CodeVariableReferenceExpression(a.Name)).ToArray());
+                type.Members.Add(_ctor);
+            }
+
             var props = t.GetProperties();
 
             Func<PropertyInfo, bool> lazyFilter = null;
