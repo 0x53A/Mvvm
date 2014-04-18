@@ -1,8 +1,45 @@
-﻿using System; 
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using System.Linq;
+
 
 namespace Mvvm
 {
+    public static class Extensions
+    {
+        public static bool StartsWith<T>(this IEnumerable<T> self, IEnumerable<T> other)
+        {
+            var arr_o = other.ToArray();
+            var arr_self = self.Take(arr_o.Length).ToArray();
+            return arr_o.SequenceEqual(arr_self);
+        }
+    }
+
+    public static class EncodingHelper
+    {
+        static Encoding GetEncoding(string fileName)
+        {
+            //see http://stackoverflow.com/questions/4520184/how-to-detect-the-character-encoding-of-a-text-file
+            var bytes = File.ReadAllBytes(fileName);
+            if (bytes.All(b => b < 80))
+                return Encoding.ASCII;
+            if (bytes.StartsWith(new byte[] { 0xff, 0xfe, 0x00, 0x00 }))
+                return Encoding.UTF32;
+            else if (bytes.StartsWith(new byte[] { 0xfe, 0xff }))
+                return Encoding.BigEndianUnicode;
+            else if (bytes.StartsWith(new byte[] { 0xff, 0xfe }))
+                return Encoding.Unicode;
+            else if (bytes.StartsWith(new byte[] { 0xef, 0xbb, 0xbf }))
+                return Encoding.UTF8;
+            else if (Utf8Checker.IsUtf8(bytes, bytes.Length))
+                return new UTF8Encoding(false);
+            else
+                throw new NotImplementedException();
+        }
+    }
+
     /// <summary> 
     /// http://anubis.dkuug.dk/JTC1/SC2/WG2/docs/n1335 
     ///  
