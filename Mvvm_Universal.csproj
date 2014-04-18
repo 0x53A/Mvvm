@@ -8,7 +8,7 @@
     <ProjectGuid>{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Mvvm_Universal</RootNamespace>
+    <RootNamespace>Mvvm</RootNamespace>
     <AssemblyName>Mvvm_Universal</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <TargetFrameworkProfile>Profile32</TargetFrameworkProfile>
@@ -34,15 +34,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
-  </ItemGroup>
-  <ItemGroup>
     <TargetPlatform Include="WindowsPhoneApp, Version=8.1" />
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App\Extensions.cs" />
+    <Compile Include="App\INavigationService.cs" />
+    <Compile Include="App\IRepository.cs" />
+    <Compile Include="App\ISuspensionService.cs" />
     <Compile Include="AssemblyReference.cs" />
     <Compile Include="AsyncLock.cs" />
+    <Compile Include="Base32.cs" />
     <Compile Include="CodeGen\CG.cs" />
     <Compile Include="CodeGen\CompileTimeMapping.cs" />
     <Compile Include="CodeGen\InterfaceCopy.cs" />
@@ -50,9 +52,12 @@
     <Compile Include="EventToCommand.cs" />
     <Compile Include="EventTriggerCommand.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="FirstClassEvents\Event.cs" />
+    <Compile Include="FirstClassEvents\IEvent.cs" />
     <Compile Include="G.cs" />
     <Compile Include="Grid.cs" />
     <Compile Include="IEventTriggerCommand.cs" />
+    <Compile Include="App\INavigationObject.cs" />
     <Compile Include="INPC.cs" />
     <Compile Include="InterfaceSerialization.cs" />
     <Compile Include="ObservableCollectionExtensions.cs" />

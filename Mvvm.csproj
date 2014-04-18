@@ -89,6 +89,7 @@
     <Compile Include="RelayCommand.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="UniquePtr.cs" />
+    <Compile Include="Utf8Checker.cs" />
     <Compile Include="ViewModelBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

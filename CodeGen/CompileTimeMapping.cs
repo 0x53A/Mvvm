@@ -26,8 +26,9 @@ namespace Mvvm.CodeGen
             });
         }
 
-        internal static object New(Type mappedType)
+        internal static object New(Type t)
         {
+            var mappedType = Map(t);
             var instance = Activator.CreateInstance(mappedType);
             return instance;
         }
