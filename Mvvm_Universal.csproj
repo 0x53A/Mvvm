@@ -66,6 +66,8 @@
     <Compile Include="RelayCommand.cs" />
     <Compile Include="TGuid.cs" />
     <Compile Include="Tree.cs" />
+    <Compile Include="UniquePtr.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="ViewModelBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

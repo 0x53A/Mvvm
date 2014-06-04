@@ -20,14 +20,14 @@ namespace Mvvm.CodeGen
     {
         public static T New<T>(Action<T> init = null)
         {
-#if !NO_RUNTIME_CODEGEN
             var t = typeof(T);
+#if !NO_RUNTIME_CODEGEN
             if (t.IsInterface)
                 return DBCGenerator.Generate<T>(init);
             else
                 return VMWrapper.Wrap<T>(init);
 #else
-            Debug.Assert(t.GetCustomAttribute<TypeOverrideAttribute>() != null, "Attribute 'TypeOverrideAttribute' missing on type '{0}'".FormatWith(t.Name));
+            Debug.Assert(t.GetTypeInfo().GetCustomAttribute<TypeOverrideAttribute>() != null, "Attribute 'TypeOverrideAttribute' missing on type '{0}'".FormatWith(t.Name));
             return CompileTimeMapping.New<T>(init);
 #endif
         }
@@ -40,7 +40,7 @@ namespace Mvvm.CodeGen
             else
                 return VMWrapper.Map(type);
 #else
-            Debug.Assert(type.GetCustomAttribute<TypeOverrideAttribute>() != null, "Attribute 'TypeOverrideAttribute' missing on type '{0}'".FormatWith(type.Name));
+            Debug.Assert(type.GetTypeInfo().GetCustomAttribute<TypeOverrideAttribute>() != null, "Attribute 'TypeOverrideAttribute' missing on type '{0}'".FormatWith(type.Name));
             return CompileTimeMapping.Map(type);
 #endif
         }
