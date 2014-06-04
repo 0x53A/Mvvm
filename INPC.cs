@@ -177,9 +177,9 @@ namespace Mvvm
 
     public static class INPC
     {
-        public static void Subscribe<TSource, TProperty>(TSource source, Expression<Func<TSource, TProperty>> expression, Action callback)
+        public static object Subscribe<TSource, TProperty>(TSource source, Expression<Func<TSource, TProperty>> expression, Action callback)
         {
-            Subscribe(source, expression, (aa, bb) => callback());
+            return Subscribe(source, expression, (aa, bb) => callback());
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace Mvvm
         /// <param name="source">the source object, must implement INotifyPropertyChanged</param>
         /// <param name="expression">An lambda expression selecting the Property</param>
         /// <param name="callback">The callback which should be called when the Property changes</param>
-        public static void Subscribe<TSource, TProperty>(TSource source, Expression<Func<TSource, TProperty>> expression, Action<TSource, TProperty> callback)
+        public static object Subscribe<TSource, TProperty>(TSource source, Expression<Func<TSource, TProperty>> expression, Action<TSource, TProperty> callback)
         {
             Contract.Requires(expression.Body.NodeType == ExpressionType.MemberAccess);
             Contract.Requires(expression.Body is MemberExpression);
@@ -203,7 +203,9 @@ namespace Mvvm
             var prop = exp.Member as PropertyInfo;
             var getter = prop.GetMethod;
             var inpc = source as INotifyPropertyChanged;
-            inpc.PropertyChanged += (a, b) => { if (b.PropertyName == prop.Name) callback((TSource)a, (TProperty)getter.Invoke(a, null)); };
+            PropertyChangedEventHandler handler = (a, b) => { if (b.PropertyName == prop.Name) callback((TSource)a, (TProperty)getter.Invoke(a, null)); };
+            inpc.PropertyChanged += handler;
+            return handler;
         }
 
         //public static void Subscribe<TSource, TProperty>(TSource source, Expression<Func<TSource, TProperty>> expression, Func<TSource, TProperty, Task> callback)
@@ -211,10 +213,12 @@ namespace Mvvm
         //    Subscribe<TSource, TProperty>(source, expression, (a, b) => callback(a, b).Wait());
         //}
 
-        public static void SubscribeAll<TSource>(TSource source, Action<TSource, OnPropertyChanged<TSource>> callback)
+        public static object SubscribeAll<TSource>(TSource source, Action<TSource, OnPropertyChanged<TSource>> callback)
         {
             var inpc = source as INotifyPropertyChanged;
-            inpc.PropertyChanged += (a, b) => callback((TSource)a, new OnPropertyChanged<TSource>(b.PropertyName));
+            PropertyChangedEventHandler handler = (a, b) => callback((TSource)a, new OnPropertyChanged<TSource>(b.PropertyName));
+            inpc.PropertyChanged += handler;
+            return handler;
         }
 
         //public static void SubscribeAll<TSource>(TSource source, Func<TSource, OnPropertyChanged<TSource>, Task> callback)
@@ -223,11 +227,15 @@ namespace Mvvm
         //    inpc.PropertyChanged += (a, b) => callback((TSource)a, new OnPropertyChanged<TSource>(b.PropertyName)).Wait();
         //}
 
-        public static void Unsubscribe<TSource, TProperty>(TSource source, Action<TSource, TProperty> callback)
+        public static void Unsubscribe<TSource, TProperty>(TSource source, object id)
         {
-            //TODO
+            var inpc = source as INotifyPropertyChanged;
+            PropertyChangedEventHandler handler = id as PropertyChangedEventHandler;
+            inpc.PropertyChanged -= handler;
         }
-        public static INPCBinding<TSource, TDestination, TProperty> Bind<TSource, TDestination, TProperty>
+
+        public static INPCBinding<TSource, TDestination, TProperty>
+            Bind<TSource, TDestination, TProperty>
             (TSource source, Expression<Func<TSource, TProperty>> sourceSelector,
             TDestination destination, Expression<Func<TDestination, TProperty>> destinationSelector,
             BindingMode mode)

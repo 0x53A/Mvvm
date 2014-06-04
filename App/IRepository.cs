@@ -9,6 +9,6 @@ namespace Mvvm.App
     public interface IRepository
     {
         Task<T> LoadAsync<T>() where T : class;
-        Task SaveAsync<T>(T data);
+        Task SaveAsync<T>(T data) where T : class;
     }
 }

@@ -77,16 +77,17 @@ namespace TypeMapper
                         new CodeMethodReturnStatement()));
 
                 prop.SetStatements.Add(
+                    new CodeAssignStatement(
+                        new CodeFieldReferenceExpression(
+                            new CodeThisReferenceExpression(), fieldName),
+                        new CodePropertySetValueReferenceExpression()));
+
+                prop.SetStatements.Add(
                      new CodeMethodInvokeExpression(
                         new CodeMethodReferenceExpression(
                             new CodeThisReferenceExpression(), "OnPropertyChanged"),
                             new CodePrimitiveExpression(p.Name)));
 
-                prop.SetStatements.Add(
-                    new CodeAssignStatement(
-                        new CodeFieldReferenceExpression(
-                            new CodeThisReferenceExpression(), fieldName),
-                        new CodePropertySetValueReferenceExpression()));
                 type.Members.Add(prop);
             }
         }

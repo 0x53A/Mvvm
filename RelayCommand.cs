@@ -9,15 +9,19 @@ namespace Mvvm
 {
     public class RelayCommand : ICommand
     {
+        public event EventHandler CanExecuteChanged;
+
         Func<object, bool> _canExecute;
         Action<object> _execute;
 
-        public RelayCommand(Action execute) : this((o)=>execute(), (o)=>true)
+        public RelayCommand(Action execute)
+            : this((o) => execute(), (o) => true)
         {
 
         }
 
-        public RelayCommand(Action execute, Func<bool> canExecute) : this(o=>execute(), o=>canExecute())
+        public RelayCommand(Action execute, Func<bool> canExecute)
+            : this(o => execute(), o => canExecute())
         {
 
         }
@@ -34,23 +38,21 @@ namespace Mvvm
                 CanExecuteChanged(this, new EventArgs());
         }
 
-        bool ICommand.CanExecute(object parameter)
+        public bool CanExecute(object parameter)
         {
             return _canExecute(parameter);
         }
 
-        public event EventHandler CanExecuteChanged;
-
-        void ICommand.Execute(object parameter)
+        public void Execute(object parameter)
         {
             _execute(parameter);
         }
     }
 
-    //TODO: clean up implementation without changing the interface
     public class RelayCommand<T> : RelayCommand
     {
-        public RelayCommand(Action<T> execute, Func<T,bool> canExecute) : base((o)=>execute((T)o), (o)=>canExecute((T)o))
+        public RelayCommand(Action<T> execute, Func<T, bool> canExecute)
+            : base((o) => execute((T)o), (o) => canExecute((T)o))
         {
 
         }
