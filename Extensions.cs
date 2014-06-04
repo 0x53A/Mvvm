@@ -18,6 +18,11 @@ namespace Mvvm
         {
             stream.Write(buffer, 0, buffer.Length);
         }
+
+        public static int Read(this Stream stream, byte[] buffer)
+        {
+            return stream.Read(buffer, 0, buffer.Length);
+        }
     }
 
     /// <summary>
@@ -114,7 +119,7 @@ namespace Mvvm
 
             int IEqualityComparer<T>.GetHashCode(T obj)
             {
-                return obj.GetHashCode();
+                return 0;
             }
         }
 
@@ -132,6 +137,23 @@ namespace Mvvm
         public static IDictionary<TKey, TVal> ToDictionary<TKey, TVal>(this IEnumerable<KeyValuePair<TKey, TVal>> ienum)
         {
             return ienum.ToDictionary(x => x.Key, x => x.Value);
+        }
+
+        public static TVal GetFromKeyOrCreate<TKey, TVal, TLock>(this IDictionary<TKey, TVal> dict, TKey key, TLock _lock, Func<TVal> creator) where TLock : class
+        {
+            if (dict.ContainsKey(key))
+                return dict[key];
+            else
+            {
+                lock (_lock)
+                {
+                    if (dict.ContainsKey(key))
+                        return dict[key];
+                    var newVal = creator();
+                    dict[key] = newVal;
+                    return newVal;
+                }
+            }
         }
     }
 

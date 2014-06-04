@@ -14,7 +14,6 @@ using System.Threading.Tasks;
  * These methods are in the non-generic INPC class.
  * In other cases, the type of the source object must be supplied.
  * These methods are in INPC<T>.
- * 
  * */
 
 namespace Mvvm
@@ -178,6 +177,11 @@ namespace Mvvm
 
     public static class INPC
     {
+        public static void Subscribe<TSource, TProperty>(TSource source, Expression<Func<TSource, TProperty>> expression, Action callback)
+        {
+            Subscribe(source, expression, (aa, bb) => callback());
+        }
+
         /// <summary>
         /// Enables a typesafe and refactorsafe way to subscribe to a INotifyPropertyChanged event.      
         /// </summary>
@@ -191,13 +195,13 @@ namespace Mvvm
         {
             Contract.Requires(expression.Body.NodeType == ExpressionType.MemberAccess);
             Contract.Requires(expression.Body is MemberExpression);
-            Contract.Requires((expression.Body as MemberExpression).Member.MemberType == MemberTypes.Property);
+            Contract.Requires((expression.Body as MemberExpression).Member is PropertyInfo);
             Contract.Requires((expression.Body as MemberExpression).Expression is ParameterExpression);
             Contract.Requires(source is INotifyPropertyChanged);
 
             var exp = expression.Body as MemberExpression;
             var prop = exp.Member as PropertyInfo;
-            var getter = prop.GetGetMethod();
+            var getter = prop.GetMethod;
             var inpc = source as INotifyPropertyChanged;
             inpc.PropertyChanged += (a, b) => { if (b.PropertyName == prop.Name) callback((TSource)a, (TProperty)getter.Invoke(a, null)); };
         }
@@ -238,7 +242,7 @@ namespace Mvvm
         {
             Contract.Requires(expression.Body.NodeType == ExpressionType.MemberAccess);
             Contract.Requires(expression.Body is MemberExpression);
-            Contract.Requires((expression.Body as MemberExpression).Member.MemberType == MemberTypes.Property);
+            Contract.Requires((expression.Body as MemberExpression).Member is PropertyInfo);
 
             var exp = expression.Body as MemberExpression;
             var prop = exp.Member as PropertyInfo;
@@ -253,7 +257,7 @@ namespace Mvvm
         {
             Contract.Requires(expression.Body.NodeType == ExpressionType.MemberAccess);
             Contract.Requires(expression.Body is MemberExpression);
-            Contract.Requires((expression.Body as MemberExpression).Member.MemberType == MemberTypes.Property);
+            Contract.Requires((expression.Body as MemberExpression).Member is PropertyInfo);
 
             return INPC<TSource>.ExtractMemberName(expression) == toMatch;
         }

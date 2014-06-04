@@ -10,25 +10,15 @@ using System.Threading.Tasks;
 
 namespace Mvvm.CodeGen
 {
-    public static class DBCGenerator
+    internal static class DBCGenerator
     {
         static IDictionary<Type, Type> mappedTypes = new Dictionary<Type, Type>();
-
-        /// <summary>
-        /// DO NOT USE
-        /// </summary>
-        public static void ClearCache()
-        {
-            lock (mappedTypes)
-            {
-                mappedTypes.Clear();
-            }
-        }
+        static object _lock = new object();
 
         /// <summary>
         /// See Generate
         /// </summary>
-        public static Type Map<T>()
+        internal static Type Map<T>()
         {
             //T must be a property-only interface
             Contract.Requires(typeof(T).IsInterface);
@@ -43,7 +33,7 @@ namespace Mvvm.CodeGen
         /// <summary>
         /// See Generate
         /// </summary>
-        public static Type Map(Type targetType)
+        internal static Type Map(Type targetType)
         {
             //T must be a property-only interface
             Contract.Requires(targetType.IsInterface);
@@ -51,28 +41,7 @@ namespace Mvvm.CodeGen
             //all get-only properties must have default constructors
             Contract.Requires(targetType.GetProperties().Where(p => p.CanRead && !p.CanWrite).All(p => p.PropertyType.GetConstructor(Type.EmptyTypes) != null));
 
-            Type mappedType;
-
-            if (mappedTypes.ContainsKey(targetType))
-                mappedType = mappedTypes[targetType];
-            else
-            {
-                lock (mappedTypes)
-                {
-                    //it may have been added between the first check and the lock....
-                    if (mappedTypes.ContainsKey(targetType))
-                    {
-                        mappedType = mappedTypes[targetType];
-                    }
-                    else
-                    {
-                        mappedType = CreateInterfaceMap(targetType);
-                        mappedTypes.Add(targetType, mappedType);
-                    }
-                }
-            }
-
-            return mappedType;
+            return mappedTypes.GetFromKeyOrCreate(targetType, _lock, () => CreateInterfaceMap(targetType));
         }
 
         /// <summary>
@@ -85,7 +54,7 @@ namespace Mvvm.CodeGen
         /// <typeparam name="T">The Interface which should be implemented</typeparam>
         /// <param name="initializer">optional: a function which initializes the newly constructed object</param>
         /// <returns>a newly constructed object</returns>
-        public static T Generate<T>(Action<T> initializer = null)
+        internal static T Generate<T>(Action<T> initializer = null)
         {
             //T must be a property-only interface
             Contract.Requires(typeof(T).IsInterface);
@@ -102,7 +71,7 @@ namespace Mvvm.CodeGen
             return obj;
         }
 
-        public static object Generate(Type targetType)
+        internal static object Generate(Type targetType)
         {
             //T must be a property-only interface
             Contract.Requires(targetType.IsInterface);
@@ -134,10 +103,6 @@ namespace Mvvm.CodeGen
 #endif
             }
 
-            var intArray = new[] { 5, 6, 7, 8, 9, 10 };
-            var even = intArray.Where(i => i % 2 == 0);
-
-
             var access = (dump == true) ? AssemblyBuilderAccess.RunAndSave : AssemblyBuilderAccess.Run;
             var assemblyName = "assembly_{0}_{1}".FormatWith(targetType.FullName, Guid.NewGuid());
             var ab = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName), access);
@@ -148,8 +113,9 @@ namespace Mvvm.CodeGen
             else
                 mb = ab.DefineDynamicModule("generated");
 
-            var attr = targetType.GetCustomAttribute<GeneratedTypeNameAttribute>();
-            var name = attr != null ? attr.TypeName : targetType.FullName;
+            var attr = targetType.GetCustomAttribute<TypeOverrideAttribute>();
+            var name = attr != null ? attr.TypeName : targetType.Namespace;
+            name = name ?? targetType.FullName;
             var tb = mb.DefineType(name, CodeGenInternal.GeneratedTypeAttributes, null, new[] { targetType, typeof(INotifyPropertyChanged) });
 
             var constructor = tb.DefineConstructor(CodeGenInternal.ConstructorAttributes, CallingConventions.HasThis, null);

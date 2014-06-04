@@ -27,22 +27,12 @@ namespace Mvvm.CodeGen
 
     }
 
-    public static class VMWrapper
+    internal static class VMWrapper
     {
         static IDictionary<Type, Type> mappedTypes = new Dictionary<Type, Type>();
+        static object _lock = new object();
 
-        /// <summary>
-        /// DO NOT USE
-        /// </summary>
-        public static void ClearCache()
-        {
-            lock (mappedTypes)
-            {
-                mappedTypes.Clear();
-            }
-        }
-
-        public static Type Map<T>()
+        internal static Type Map<T>()
         {
             //TODO: Contract.Requires
 
@@ -50,35 +40,14 @@ namespace Mvvm.CodeGen
             return Map(targetType);
         }
 
-        public static Type Map(Type targetType)
+        internal static Type Map(Type targetType)
         {
             //TODO: Contract.Requires
 
-            Type mappedType;
-
-            if (mappedTypes.ContainsKey(targetType))
-                mappedType = mappedTypes[targetType];
-            else
-            {
-                lock (mappedTypes)
-                {
-                    //it may have been added between the first check and the lock....
-                    if (mappedTypes.ContainsKey(targetType))
-                    {
-                        mappedType = mappedTypes[targetType];
-                    }
-                    else
-                    {
-                        mappedType = CreateClassMap(targetType);
-                        mappedTypes.Add(targetType, mappedType);
-                    }
-                }
-            }
-
-            return mappedType;
+            return mappedTypes.GetFromKeyOrCreate(targetType, _lock, () => CreateClassMap(targetType));
         }
 
-        public static T Wrap<T>(Action<T> initializer = null)
+        internal static T Wrap<T>(Action<T> initializer = null)
         {
             //TODO: Contract.Requires
 
@@ -89,7 +58,7 @@ namespace Mvvm.CodeGen
             return obj;
         }
 
-        public static object Wrap(Type targetType)
+        internal static object Wrap(Type targetType)
         {
             //TODO: Contract.Requires
 
@@ -123,7 +92,10 @@ namespace Mvvm.CodeGen
 
             bool hasINPC = targetType.GetInterfaces().Contains(typeof(INotifyPropertyChanged));
             var interfacesToImplement = hasINPC ? Type.EmptyTypes : new[] { typeof(INotifyPropertyChanged) };
-            var tb = mb.DefineType("dbc_{0}".FormatWith(targetType.FullName), CodeGenInternal.GeneratedTypeAttributes, targetType, interfacesToImplement);
+            var attr = targetType.GetCustomAttribute<TypeOverrideAttribute>();
+            var typeName = attr != null ? attr.TypeName : targetType.FullName;
+            typeName = typeName ?? targetType.FullName;
+            var tb = mb.DefineType(typeName, CodeGenInternal.GeneratedTypeAttributes, targetType, interfacesToImplement);
 
             var constructor = tb.DefineConstructor(CodeGenInternal.ConstructorAttributes, CallingConventions.HasThis, null);
             var ctorIL = constructor.GetILGenerator();
@@ -140,9 +112,9 @@ namespace Mvvm.CodeGen
 
             foreach (var property in targetType.GetProperties())
             {
-                if (property.CanRead && property.CanWrite && property.CustomAttributes.Any(a => a.AttributeType == typeof(InpcAttribute)))
+                if ((property.CanRead && property.CanWrite && property.GetMethod.IsAbstract && property.SetMethod.IsAbstract) || property.CustomAttributes.Any(a => a.AttributeType == typeof(InpcAttribute)))
                     CodeGenInternal.CreateReadWriteProperty(tb, property, raiseMethod, false);
-                else if (property.CanRead && !property.CanWrite && property.CustomAttributes.Any(a => a.AttributeType == typeof(LazyAttribute)))
+                else if ((property.CanRead && (!property.CanWrite) && property.GetMethod.IsAbstract) || property.CustomAttributes.Any(a => a.AttributeType == typeof(LazyAttribute)))
                     CodeGenInternal.CreateReadOnlyLazyProperty(tb, property, ctorIL, false);
             }
 
