@@ -77,6 +77,7 @@
     <Compile Include="CodeGen\InterfaceCopy.cs" />
     <Compile Include="CodeGen\Internal.cs" />
     <Compile Include="CodeGen\VMWrapper.cs" />
+    <Compile Include="ComparisonBuilder.cs" />
     <Compile Include="EventToCommand.cs" />
     <Compile Include="EventTriggerCommand.cs" />
     <Compile Include="Extensions.cs" />
@@ -96,6 +97,12 @@
     <Compile Include="Utf8Checker.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="ViewModelBase.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
