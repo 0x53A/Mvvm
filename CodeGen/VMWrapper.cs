@@ -67,7 +67,7 @@ namespace Mvvm.CodeGen
             return obj;
         }
 
-        private static Type CreateClassMap(Type targetType, bool? dump = null)
+        private static Type CreateClassMap(Type targetType, bool? dump = false)
         {
             //TODO: Contract.Requires
 
