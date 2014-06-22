@@ -24,8 +24,8 @@ namespace Mvvm
 
             knownTypes.Add(t);
 
-            if (t.IsConstructedGenericType)
-                foreach (var gt in t.GenericTypeArguments)
+            if (t.GetIsConstructedGenericType())
+                foreach (var gt in t.GetGenericTypeArguments())
                     EnumerateAllTypes(gt, knownTypes);
 
             foreach (var p in t.GetRuntimeProperties())

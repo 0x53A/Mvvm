@@ -79,7 +79,7 @@ let getAllMembers (tp : Type) =
 
 let voidType = Type.GetType("System.Void")
 
-///returns a Func<> or Action<> type which matches the MethodInfo
+/// returns a Func<> or Action<> type which matches the MethodInfo
 let getDelegateType (mi : MethodInfo) =
     let parameters = mi.GetParameters() |> Array.map (fun p -> p.ParameterType)
     if mi.ReturnType = voidType then
@@ -134,7 +134,7 @@ let OverrideAttributes = MethodAttributes.Public ||| MethodAttributes.HideBySig 
 /// the Attributes for a normal, nonvirtual instance method
 let PrivateInstanceMethodAttributes = MethodAttributes.Private ||| MethodAttributes.HideBySig
 
-/// the Attributes for a normal, nonvirtual instance method
+/// the Attributes for a normal, nonvirtual static method
 let PrivateStaticMethodAttributes = MethodAttributes.Private ||| MethodAttributes.HideBySig ||| MethodAttributes.Static
 
 ///implement a member in the typebuilder
