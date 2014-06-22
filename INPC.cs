@@ -201,7 +201,7 @@ namespace Mvvm
 
             var exp = expression.Body as MemberExpression;
             var prop = exp.Member as PropertyInfo;
-            var getter = prop.GetMethod;
+            var getter = prop.GetGetMethod();
             var inpc = source as INotifyPropertyChanged;
             PropertyChangedEventHandler handler = (a, b) => { if (b.PropertyName == prop.Name) callback((TSource)a, (TProperty)getter.Invoke(a, null)); };
             inpc.PropertyChanged += handler;

@@ -68,11 +68,11 @@ namespace Mvvm.CodeGen
                 var getters = new List<MethodInfo>();
                 var setters = new List<MethodInfo>();
 
-                var props = key.TCopy.Flatten(t => t.GetTypeInfo().ImplementedInterfaces).Distinct().SelectMany(i => i.GetRuntimeProperties()).Distinct((a, b) => a.Name == b.Name && a.PropertyType == b.PropertyType);
+                var props = key.TCopy.Flatten(t => t.GetTypeInfo().GetInterfaces()).Distinct().SelectMany(i => i.GetRuntimeProperties()).Distinct((a, b) => a.Name == b.Name && a.PropertyType == b.PropertyType);
                 foreach (var p in props)
                 {
-                    var getter = key.TSource.GetRuntimeProperty(p.Name).GetMethod;
-                    var setter = key.TDestination.GetRuntimeProperty(p.Name).SetMethod;
+                    var getter = key.TSource.GetRuntimeProperty(p.Name).GetGetMethod();
+                    var setter = key.TDestination.GetRuntimeProperty(p.Name).GetSetMethod();
                     getters.Add(getter);
                     setters.Add(setter);
                 }
