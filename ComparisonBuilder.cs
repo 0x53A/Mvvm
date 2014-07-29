@@ -32,7 +32,7 @@ namespace Mvvm
 
     public class ComparisonSequence<T> where T : class
     {
-        private List<Comparison> _comparisons;
+        private List<Comparison> _comparisons = new List<Comparison>();
 
         public ComparisonSequence<T> Add<T1>(Func<T, T1> c1)
         {

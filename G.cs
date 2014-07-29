@@ -108,6 +108,83 @@ namespace Mvvm
         }
     }
 
+    internal class PerGridValues
+    {
+        internal struct Status
+        {
+            internal int Rows { get; private set; }
+            internal int Columns { get; private set; }
+            internal int NChildren { get; private set; }
+            internal Status(int rows, int columns, int nChildren)
+                : this()
+            {
+                Rows = rows;
+                Columns = columns;
+                NChildren = nChildren;
+            }
+        }
+
+        Grid grid;
+        Status status;
+        Dictionary<UIElement, GridPositioning.Position> presetValues = new Dictionary<UIElement, GridPositioning.Position>();
+
+        internal PerGridValues(Grid grid)
+        {
+            this.grid = grid;
+        }
+
+        internal void Recalculate()
+        {
+            var rows = grid.RowDefinitions.Count;
+            if (rows == 0)
+                rows = 1;
+            var columns = grid.ColumnDefinitions.Count;
+            if (columns == 0)
+                columns = 1;
+            var nChildren = grid.Children.Count;
+
+            var newStatus = new Status(rows, columns, nChildren);
+            if (newStatus.Equals(status))
+                return;
+            else
+                status = newStatus;
+
+            GridPositioning posAlgo = new GridPositioning(columns, rows);
+            for (int i = 0; i < nChildren; i++)
+            {
+                var child = (FrameworkElement)grid.Children[i];
+                GridPositioning.Position preset;
+                if (presetValues.ContainsKey(child))
+                    preset = presetValues[child];
+                else
+                {
+                    var c = child.ReadLocalValue(Grid.ColumnProperty);
+                    var r = child.ReadLocalValue(Grid.RowProperty);
+                    var cs = child.ReadLocalValue(Grid.ColumnSpanProperty);
+                    var rs = child.ReadLocalValue(Grid.RowSpanProperty);
+
+
+                    int? column = c.Equals(DependencyProperty.UnsetValue) ? null : (int?)(int)c;
+                    int? row = r.Equals(DependencyProperty.UnsetValue) ? null : (int?)(int)r;
+                    int columnSpan = cs.Equals(DependencyProperty.UnsetValue) ? 1 : (int)cs;
+                    int rowSpan = rs.Equals(DependencyProperty.UnsetValue) ? 1 : (int)rs;
+
+                    //HACK
+                    //column = null;
+                    //row = null;
+                    //HACK
+
+                    preset = new GridPositioning.Position() { X = column, Y = row, Width = columnSpan, Height = rowSpan };
+                    presetValues[child] = preset;
+                }
+
+                var pos = posAlgo.Get(preset);
+                Grid.SetColumn((FrameworkElement)child, pos.X);
+                Grid.SetRow((FrameworkElement)child, pos.Y);
+            }
+        }
+    }
+
     public class G
     {
         /**********/
@@ -126,12 +203,8 @@ namespace Mvvm
             return (string)element.GetValue(RowsProperty);
         }
 
-        static void OnRowsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        static string[] ParseAndSplit(DependencyPropertyChangedEventArgs args)
         {
-            var grid = obj as Grid;
-            if (grid == null)
-                throw new Exception();
-
             var newValue = args.NewValue as String;
             if (newValue == null)
                 throw new Exception();
@@ -143,6 +216,16 @@ namespace Mvvm
             var substrings = newValue.Split(';');
             if (substrings.Any(s => String.IsNullOrWhiteSpace(s)))
                 throw new Exception();
+            return substrings;
+        }
+
+        static void OnRowsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        {
+            var grid = obj as Grid;
+            if (grid == null)
+                throw new Exception();
+
+            var substrings = ParseAndSplit(args);
 
             //clear old collection
             RowDefinitionCollection col = grid.RowDefinitions;
@@ -176,17 +259,7 @@ namespace Mvvm
             if (grid == null)
                 throw new Exception();
 
-            var newValue = args.NewValue as String;
-            if (newValue == null)
-                throw new Exception();
-
-            var allowedChars = "0123456789;aAuto*.";
-            if (newValue.Any(c => !allowedChars.Contains(c)))
-                throw new Exception();
-
-            var substrings = newValue.Split(';');
-            if (substrings.Any(s => String.IsNullOrWhiteSpace(s)))
-                throw new Exception();
+            var substrings = ParseAndSplit(args);
 
             //clear old collection
             ColumnDefinitionCollection col = grid.ColumnDefinitions;
@@ -198,6 +271,7 @@ namespace Mvvm
         }
 
         /* Autoset */
+
 
         public static readonly DependencyProperty AutoArrange = DependencyProperty.RegisterAttached("AutoArrange", typeof(bool), typeof(G), new PropertyMetadata(false, new PropertyChangedCallback(OnAutoArrangeChanged)));
 
@@ -211,60 +285,13 @@ namespace Mvvm
             return (bool)element.GetValue(AutoArrange);
         }
 
-        static Dictionary<Grid, Tuple<int, int, int>> gridValues = new Dictionary<Grid, Tuple<int, int, int>>();
-        static Dictionary<UIElement, GridPositioning.Position> presetValues = new Dictionary<UIElement, GridPositioning.Position>();
+        static object gridValuesLock = new object();
+        static Dictionary<Grid, PerGridValues> gridValues = new Dictionary<Grid, PerGridValues>();
 
         static void RecalculateGrid(Grid grid)
         {
-            var rows = grid.RowDefinitions.Count;
-            if (rows == 0)
-                rows = 1;
-            var columns = grid.ColumnDefinitions.Count;
-            if (columns == 0)
-                columns = 1;
-            var nChildren = grid.Children.Count;
-
-            var tuple = Tuple.Create(rows, columns, nChildren);
-            if ((!gridValues.ContainsKey(grid)) || gridValues[grid] != tuple)
-            {
-                gridValues[grid] = tuple;
-
-                GridPositioning posAlgo = new GridPositioning(columns, rows);
-                for (int i = 0; i < nChildren; i++)
-                {
-                    var child = (FrameworkElement)grid.Children[i];
-                    GridPositioning.Position preset;
-                    if (presetValues.ContainsKey(child))
-                        preset = presetValues[child];
-                    else
-                    {
-                        int? column = Grid.GetColumn(child);
-                        if (column < 0)
-                            column = null;
-                        int? row = Grid.GetRow(child);
-                        if (row < 0)
-                            row = null;
-                        int columnSpan = Grid.GetColumnSpan(child);
-                        if (columnSpan <= 0)
-                            columnSpan = 1;
-                        int rowSpan = Grid.GetRowSpan(child);
-                        if (rowSpan <= 0)
-                            rowSpan = 1;
-
-                        //HACK
-                        column = null;
-                        row = null;
-                        //HACK
-
-                        preset = new GridPositioning.Position() { X = column, Y = row, Width = columnSpan, Height = rowSpan };
-                        presetValues[child] = preset;
-                    }
-
-                    var pos = posAlgo.Get(preset);
-                    Grid.SetColumn((FrameworkElement)child, pos.X);
-                    Grid.SetRow((FrameworkElement)child, pos.Y);
-                }
-            }
+            var gv = gridValues.GetFromKeyOrCreate(grid, gridValuesLock, () => new PerGridValues(grid));
+            gv.Recalculate();
         }
 
         static void OnAutoArrangeChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)

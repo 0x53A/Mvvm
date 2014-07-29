@@ -13,6 +13,7 @@ namespace Mvvm.CodeGen
     /// Notifies the VMWrapper that this Property should be overridden and implement INotifyPropertyChanged.
     /// It can only be applied to properties with getter and setter
     /// </summary>
+    [AttributeUsage(AttributeTargets.Property)]
     public class InpcAttribute : Attribute
     {
 
@@ -22,6 +23,7 @@ namespace Mvvm.CodeGen
     /// Notifies the VMWrapper that this property should be overridden and implemented using Lazy initialization.
     /// It can only be applied to get-only properties
     /// </summary>
+    [AttributeUsage(AttributeTargets.Property)]
     public class LazyAttribute : Attribute
     {
 
