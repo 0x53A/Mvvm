@@ -17,7 +17,7 @@ namespace Mvvm
         public AsyncLock()
         {
             m_semaphore = new AsyncSemaphore(1);
-            m_releaser = Task.FromResult(new Releaser(this));
+            m_releaser = TaskHelper.FromResult(new Releaser(this));
         }
 
         public Task<Releaser> LockAsync()
@@ -46,7 +46,7 @@ namespace Mvvm
 
     public class AsyncSemaphore
     {
-        private readonly static Task s_completed = Task.FromResult(true);
+        private readonly static Task s_completed = TaskHelper.FromResult(true);
         private readonly Queue<TaskCompletionSource<bool>> m_waiters = new Queue<TaskCompletionSource<bool>>();
         private int m_currentCount;
 

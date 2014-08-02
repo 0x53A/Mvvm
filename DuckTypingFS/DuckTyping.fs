@@ -18,7 +18,7 @@ type DuckTyping =
     static member private _mappings = new Dictionary<MappingKey, MappingValue>()
     static member private _lock = new Object()
 
-    ///Maps a Thing-Type to an interface-Type
+    ///Maps a Thing-Type to an interface-Type.
     ///Returns the mapped type and a function to initialise it
     static member Map tDuck tThing =
         let key = { TDuck = tDuck; TThing = tThing }

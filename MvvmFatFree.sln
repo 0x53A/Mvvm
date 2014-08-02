@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30324.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvvm", "Mvvm.csproj", "{14CDF2D3-403E-4C4C-8718-990914680286}"
 EndProject
@@ -18,6 +18,21 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvvm_Universal", "Mvvm_Universal.csproj", "{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeMapper", "TypeMapper\TypeMapper.csproj", "{57DACB07-C97A-4660-B15C-01A0609BFD9F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvvm_NET40", "Mvvm_NET40.csproj", "{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvvmTests_NET40", "MvvmTests\MvvmTests_NET40.csproj", "{2257DC83-3D0B-4958-8BA0-677C06CA7BD2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mvvm", "Mvvm", "{79AFE1D3-9924-47A1-8BDE-970CC0B2172C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mvvm.Test", "Mvvm.Test", "{550E8AAE-CF03-408E-BA8A-E6BEC91AE6C2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{AB97EF0A-5C85-4AED-A033-A2A9DF34E35A}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,8 +118,36 @@ Global
 		{57DACB07-C97A-4660-B15C-01A0609BFD9F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{57DACB07-C97A-4660-B15C-01A0609BFD9F}.Release|ARM.ActiveCfg = Release|Any CPU
 		{57DACB07-C97A-4660-B15C-01A0609BFD9F}.Release|x86.ActiveCfg = Release|Any CPU
+		{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}.Debug|x86.ActiveCfg = Debug|x86
+		{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}.Debug|x86.Build.0 = Debug|x86
+		{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}.Release|ARM.ActiveCfg = Release|Any CPU
+		{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}.Release|x86.ActiveCfg = Release|x86
+		{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}.Release|x86.Build.0 = Release|x86
+		{2257DC83-3D0B-4958-8BA0-677C06CA7BD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2257DC83-3D0B-4958-8BA0-677C06CA7BD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2257DC83-3D0B-4958-8BA0-677C06CA7BD2}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{2257DC83-3D0B-4958-8BA0-677C06CA7BD2}.Debug|x86.ActiveCfg = Debug|x86
+		{2257DC83-3D0B-4958-8BA0-677C06CA7BD2}.Debug|x86.Build.0 = Debug|x86
+		{2257DC83-3D0B-4958-8BA0-677C06CA7BD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2257DC83-3D0B-4958-8BA0-677C06CA7BD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2257DC83-3D0B-4958-8BA0-677C06CA7BD2}.Release|ARM.ActiveCfg = Release|Any CPU
+		{2257DC83-3D0B-4958-8BA0-677C06CA7BD2}.Release|x86.ActiveCfg = Release|x86
+		{2257DC83-3D0B-4958-8BA0-677C06CA7BD2}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{14CDF2D3-403E-4C4C-8718-990914680286} = {79AFE1D3-9924-47A1-8BDE-970CC0B2172C}
+		{07C03C10-BE66-4FB4-AB59-AC76301E93FF} = {550E8AAE-CF03-408E-BA8A-E6BEC91AE6C2}
+		{DCF43062-EA1B-4F07-B31A-DC587A3A6A97} = {79AFE1D3-9924-47A1-8BDE-970CC0B2172C}
+		{84800CB3-AFF5-41FD-A5FE-DBA3D9CE7F9F} = {79AFE1D3-9924-47A1-8BDE-970CC0B2172C}
+		{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6} = {79AFE1D3-9924-47A1-8BDE-970CC0B2172C}
+		{2257DC83-3D0B-4958-8BA0-677C06CA7BD2} = {550E8AAE-CF03-408E-BA8A-E6BEC91AE6C2}
 	EndGlobalSection
 EndGlobal
