@@ -114,6 +114,29 @@ namespace Mvvm
             }
         }
 
+        public static IEnumerable<TNode> AsSingleLinkedList<TNode>(this TNode source, Func<TNode, TNode> extractChildNode)
+        {
+            var node = source;
+            while (node != null)
+            {
+                yield return node;
+                node = extractChildNode(node);
+            }
+        }
+
+        /// <summary>
+        /// Null propagating action. if the source is null, return null, else return the result of the action.
+        /// </summary>
+        public static TResult NP<TSource, TResult>(this TSource source, Func<TSource, TResult> action)
+            where TSource : class
+            where TResult : class
+        {
+            if (source == null)
+                return null;
+            else
+                return action(source);
+        }
+
         private class EqualityComparer<T> : IEqualityComparer<T>
         {
             Func<T, T, bool> _comparisonFunc;

@@ -56,5 +56,10 @@ namespace Mvvm
         {
 
         }
+        public RelayCommand(Action<T> execute)
+            : base((o) => execute((T)o), o=>true)
+        {
+
+        }
     }
 }
