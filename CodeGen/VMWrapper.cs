@@ -69,7 +69,7 @@ namespace Mvvm.CodeGen
             return obj;
         }
 
-        private static Type CreateClassMap(Type targetType, bool? dump = null)
+        private static Type CreateClassMap(Type targetType, bool? dump = false)
         {
             //TODO: Contract.Requires
 
@@ -114,9 +114,9 @@ namespace Mvvm.CodeGen
 
             foreach (var property in targetType.GetProperties())
             {
-                if ((property.CanRead && property.CanWrite && property.GetMethod.IsAbstract && property.SetMethod.IsAbstract) || property.CustomAttributes.Any(a => a.AttributeType == typeof(InpcAttribute)))
+                if ((property.CanRead && property.CanWrite && property.GetGetMethod().IsAbstract && property.GetSetMethod().IsAbstract) || property.GetCustomAttributes(false).Any(a => a is InpcAttribute))
                     CodeGenInternal.CreateReadWriteProperty(tb, property, raiseMethod, false);
-                else if ((property.CanRead && (!property.CanWrite) && property.GetMethod.IsAbstract) || property.CustomAttributes.Any(a => a.AttributeType == typeof(LazyAttribute)))
+                else if ((property.CanRead && (!property.CanWrite) && property.GetGetMethod().IsAbstract) || property.GetCustomAttributes(false).Any(a => a is LazyAttribute))
                     CodeGenInternal.CreateReadOnlyLazyProperty(tb, property, ctorIL, false);
             }
 

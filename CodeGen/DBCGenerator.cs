@@ -86,7 +86,7 @@ namespace Mvvm.CodeGen
             return obj;
         }
 
-        private static Type CreateInterfaceMap(Type targetType, bool? dump = null)
+        private static Type CreateInterfaceMap(Type targetType, bool? dump = false)
         {
             //T must be a property-only interface
             Contract.Requires(targetType.IsInterface);
