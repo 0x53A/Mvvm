@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !(UNIVERSAL||WINDOWS_PHONE)
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -136,3 +137,4 @@ namespace Mvvm.CodeGen
         }
     }
 }
+#endif

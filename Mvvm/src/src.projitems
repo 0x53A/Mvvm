@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>13ee4e85-a193-4bed-9405-05c205492a28</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>src</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)App\Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)App\INavigationObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)App\INavigationService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)App\IRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)App\ISuspensionService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)App\ServiceLocator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyReference.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AsyncLock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base32.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\CG.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\CompileTimeMapping.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\DBCGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\InterfaceCopy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\Internal.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\TypeOverrideAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\VMWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ComparisonBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventToCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventTriggerCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FirstClassEvents\Event.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FirstClassEvents\IEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)G.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Grid.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IEventTriggerCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)INPC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InterfaceSerialization.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Net40Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ObservableCollectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsing\FixedTokensParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RelayCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TGuid.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UniquePtr.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utf8Checker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModelBase.cs" />
+  </ItemGroup>
+</Project>

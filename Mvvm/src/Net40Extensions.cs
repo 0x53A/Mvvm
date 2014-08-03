@@ -5,20 +5,26 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Mvvm
 {
     public static class Net40Extensions
     {
 #if NET40
-        public static T GetCustomAttribute<T>(this Type t) where T : Attribute
+        public static T GetCustomAttribute<T>(this MemberInfo t) where T : Attribute
         {
-            return (T)t.GetCustomAttributes(false).FirstOrDefault(a => a is T);
+            return t.GetCustomAttributes(typeof(T), false).FirstOrDefault() as T;
         }
 
         public static Type GetTypeInfo(this Type t)
         {
             return t;
+        }
+
+        public static MethodInfo GetDeclaredMethod(this Type t, string name)
+        {
+            return t.GetMethod(name);
         }
 
         public static IList<PropertyInfo> GetRuntimeProperties(this Type t)
@@ -67,6 +73,32 @@ namespace Mvvm
             return !t.ContainsGenericParameters;
 #else
             return t.IsConstructedGenericType;
+#endif
+        }
+
+#if NET40
+        public static IList<ConstructorInfo> GetDeclaredConstructors(this Type t)
+#else
+        public static IEnumerable<ConstructorInfo> GetDeclaredConstructors(this TypeInfo t)
+#endif
+        {
+#if NET40
+            return t.GetConstructors();
+#else
+            return t.DeclaredConstructors;
+#endif
+        }
+
+#if NET40
+        public static IList<PropertyInfo> GetDeclaredProperties(this Type t)
+#else
+        public static IEnumerable<PropertyInfo> GetDeclaredProperties(this TypeInfo t)
+#endif
+        {
+#if NET40
+            return t.GetProperties();
+#else
+            return t.DeclaredProperties;
 #endif
         }
 

@@ -48,7 +48,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mvvm.csproj">
+    <ProjectReference Include="..\Mvvm\Mvvm\Mvvm.csproj">
       <Project>{14cdf2d3-403e-4c4c-8718-990914680286}</Project>
       <Name>Mvvm</Name>
     </ProjectReference>

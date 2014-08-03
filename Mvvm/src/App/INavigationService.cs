@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNIVERSAL
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,3 +29,4 @@ namespace Mvvm.App
         IList<PageStackEntry> ForwardStack { get; }
     }
 }
+#endif

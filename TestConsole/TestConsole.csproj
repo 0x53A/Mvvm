@@ -74,13 +74,13 @@
       <Project>{4e6f4477-3602-412e-8b25-e818f5bca0a2}</Project>
       <Name>MvvmFS</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Mvvm.csproj">
-      <Project>{14cdf2d3-403e-4c4c-8718-990914680286}</Project>
-      <Name>Mvvm</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MvvmTests\MvvmTests.csproj">
       <Project>{07c03c10-be66-4fb4-ab59-ac76301e93ff}</Project>
       <Name>MvvmTests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Mvvm\Mvvm\Mvvm.csproj">
+      <Project>{14cdf2d3-403e-4c4c-8718-990914680286}</Project>
+      <Name>Mvvm</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
