@@ -88,14 +88,14 @@ namespace Mvvm.App
             var ti = typeof(T).GetTypeInfo();
             var props = ti
                 .AsSingleLinkedList(n => n.BaseType.NP(_ => _.GetTypeInfo())) // get all base classes
-                .SelectMany(t => t.DeclaredProperties.Where(p => p.GetCustomAttribute<PropertyResolve>() != null))
+                .SelectMany(t => t.GetDeclaredProperties().Where(p => p.GetCustomAttribute<PropertyResolve>() != null))
                 .ToArray();
             if (ctor == null)
             {
 
-                var ci = ti.DeclaredConstructors.SingleOrDefault(c => c.GetCustomAttribute<CtorResolve>() != null);
+                var ci = ti.GetDeclaredConstructors().SingleOrDefault(c => c.GetCustomAttribute<CtorResolve>() != null);
                 if (ci == null)
-                    ci = ti.DeclaredConstructors.Single(c => c.GetParameters().Length == 0);
+                    ci = ti.GetDeclaredConstructors().Single(c => c.GetParameters().Length == 0);
                 ctor = () =>
                 {
                     object o;
@@ -112,7 +112,7 @@ namespace Mvvm.App
                 if (preResolveInit != null)
                     preResolveInit(o);
                 foreach (var p in props)
-                    p.SetMethod.Invoke(o, new[] { container.Get(p.PropertyType) });
+                    p.GetSetMethod().Invoke(o, new[] { container.Get(p.PropertyType) });
                 if (postResolveInit != null)
                     postResolveInit(o);
                 return o;

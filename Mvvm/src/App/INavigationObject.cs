@@ -1,4 +1,5 @@
-﻿using Mvvm.FirstClassEvents;
+﻿#if UNIVERSAL
+using Mvvm.FirstClassEvents;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,3 +54,4 @@ namespace Mvvm
         IEvent<INavigationObject, NavigatedToEventArgs> NavigatedTo { get; }
     }
 }
+#endif

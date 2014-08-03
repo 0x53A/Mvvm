@@ -17,17 +17,27 @@ namespace Mvvm
         }
     }
 
+    //see http://stackoverflow.com/questions/4520184/how-to-detect-the-character-encoding-of-a-text-file
     public static class EncodingHelper
     {
+#if !(UNIVERSAL||WINDOWS_PHONE)
         static Encoding GetEncoding(string fileName)
         {
-            //see http://stackoverflow.com/questions/4520184/how-to-detect-the-character-encoding-of-a-text-file
             var bytes = File.ReadAllBytes(fileName);
+            return GetEncoding(bytes);
+        }
+#endif
+
+        static Encoding GetEncoding(byte[] bytes)
+        {
+#if !(UNIVERSAL||WINDOWS_PHONE)
             if (bytes.All(b => b < 80))
                 return Encoding.ASCII;
             if (bytes.StartsWith(new byte[] { 0xff, 0xfe, 0x00, 0x00 }))
                 return Encoding.UTF32;
-            else if (bytes.StartsWith(new byte[] { 0xfe, 0xff }))
+            else
+#endif
+            if (bytes.StartsWith(new byte[] { 0xfe, 0xff }))
                 return Encoding.BigEndianUnicode;
             else if (bytes.StartsWith(new byte[] { 0xff, 0xfe }))
                 return Encoding.Unicode;
@@ -52,6 +62,7 @@ namespace Mvvm
     /// </summary> 
     public class Utf8Checker
     {
+        #if !(UNIVERSAL||WINDOWS_PHONE)
         public bool Check(string fileName)
         {
             using (BufferedStream fstream = new BufferedStream(File.OpenRead(fileName)))
@@ -59,6 +70,8 @@ namespace Mvvm
                 return this.IsUtf8(fstream);
             }
         }
+#endif
+
         /// <summary> 
         /// Check if stream is utf8 encoded. 
         /// Notice: stream is read completely in memory! 

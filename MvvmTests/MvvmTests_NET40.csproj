@@ -99,14 +99,14 @@
     <Compile Include="VMWrapperTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mvvm_NET40.csproj">
-      <Project>{9E9E8F76-2804-4AF7-84E5-1FAA7CC059D6}</Project>
-      <Name>Mvvm_NET40</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mvvm\Mvvm_NET40\Mvvm_NET40.csproj">
+      <Project>{9e9e8f76-2804-4af7-84e5-1faa7cc059d6}</Project>
+      <Name>Mvvm_NET40</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

@@ -86,7 +86,7 @@
       <Project>{4e6f4477-3602-412e-8b25-e818f5bca0a2}</Project>
       <Name>MvvmFS</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Mvvm.csproj">
+    <ProjectReference Include="..\Mvvm\Mvvm\Mvvm.csproj">
       <Project>{14cdf2d3-403e-4c4c-8718-990914680286}</Project>
       <Name>Mvvm</Name>
     </ProjectReference>
