@@ -9,8 +9,13 @@ namespace Mvvm
 {
     public class Node<T> : IEnumerable<T>
     {
+#if NET40
+        List<Node<T>> _children = new List<Node<T>>();
+        public IList<Node<T>> Children { get { return _children; } }
+#else
         List<Node<T>> _children = new List<Node<T>>();
         public IReadOnlyList<Node<T>> Children { get { return _children; } }
+#endif
         public Node<T> Parent { get; private set; }
         public T Value { get; set; }
 
