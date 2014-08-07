@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Mvvm.CodeGen
 {
-    internal static class DBCGenerator
+    internal static class InterfaceImplementor
     {
         static IDictionary<Type, Type> mappedTypes = new Dictionary<Type, Type>();
         static object _lock = new object();

@@ -135,6 +135,10 @@ namespace Mvvm
 
         internal void Recalculate()
         {
+            // wpf resets all attached properties when a template gets destroyed, but this would cause some exceptions
+            if (StackTraceHelper.Get().Contains("ClearTemplateChain"))
+                return;
+
             var rows = grid.RowDefinitions.Count;
             if (rows == 0)
                 rows = 1;

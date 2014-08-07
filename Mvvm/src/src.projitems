@@ -6,7 +6,7 @@
     <SharedGUID>13ee4e85-a193-4bed-9405-05c205492a28</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>src</Import_RootNamespace>
+    <Import_RootNamespace>Mvvm</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)App\Extensions.cs" />
@@ -15,16 +15,17 @@
     <Compile Include="$(MSBuildThisFileDirectory)App\IRepository.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)App\ISuspensionService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)App\ServiceLocator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)App\ViewModelAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyReference.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AsyncLock.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base32.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGen\CG.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGen\CompileTimeMapping.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\DBCGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\InterfaceImplementor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGen\InterfaceCopy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGen\Internal.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGen\TypeOverrideAttribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\VMWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\AbstractClassImplementor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ComparisonBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventToCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventTriggerCommand.cs" />
@@ -40,6 +41,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ObservableCollectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parsing\FixedTokensParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RelayCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StackTraceHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TGuid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UniquePtr.cs" />
