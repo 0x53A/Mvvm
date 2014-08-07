@@ -30,7 +30,7 @@ namespace Mvvm.CodeGen
 
     }
 
-    internal static class VMWrapper
+    internal static class AbstractClassImplementor
     {
         static IDictionary<Type, Type> mappedTypes = new Dictionary<Type, Type>();
         static object _lock = new object();

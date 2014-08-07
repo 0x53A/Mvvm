@@ -16,41 +16,41 @@ namespace Mvvm.CodeGen
         }
     }
 
-    internal class CopyContext
+    internal static class InterfaceCopy
     {
-        public CKey Key { get; private set; }
-        public List<MethodInfo> Getters { get; private set; }
-        public List<MethodInfo> Setters { get; private set; }
-
-        public CopyContext(CKey key, IEnumerable<MethodInfo> getters, IEnumerable<MethodInfo> setters)
+        private class CopyContext
         {
-            Key = key;
-            Getters = getters.ToList();
-            Setters = setters.ToList();
-        }
+            public CKey Key { get; private set; }
+            public List<MethodInfo> Getters { get; private set; }
+            public List<MethodInfo> Setters { get; private set; }
 
-        public struct CKey
-        {
-            public Type TCopy { get; private set; }
-            public Type TSource { get; private set; }
-            public Type TDestination { get; private set; }
-
-            public CKey(Type tCopy, Type tSource, Type tDestination)
-                : this()
+            public CopyContext(CKey key, IEnumerable<MethodInfo> getters, IEnumerable<MethodInfo> setters)
             {
-                TCopy = tCopy;
-                TSource = tSource;
-                TDestination = tDestination;
+                Key = key;
+                Getters = getters.ToList();
+                Setters = setters.ToList();
+            }
+
+            public struct CKey
+            {
+                public Type TCopy { get; private set; }
+                public Type TSource { get; private set; }
+                public Type TDestination { get; private set; }
+
+                public CKey(Type tCopy, Type tSource, Type tDestination)
+                    : this()
+                {
+                    TCopy = tCopy;
+                    TSource = tSource;
+                    TDestination = tDestination;
+                }
             }
         }
-    }
 
-    public static class InterfaceCopy
-    {
         static object _lock = new object();
         static Dictionary<CopyContext.CKey, CopyContext> _contextCache = new Dictionary<CopyContext.CKey, CopyContext>();
 
-        public static void Copy(Type tInterface, object source, object destination)
+        internal static void Copy(Type tInterface, object source, object destination)
         {
             var tSource = source.GetType();
             var tDestination = destination.GetType();
@@ -61,7 +61,7 @@ namespace Mvvm.CodeGen
             DoCopy(context, source, destination);
         }
 
-        internal static CopyContext CreateContext(CopyContext.CKey key)
+        private static CopyContext CreateContext(CopyContext.CKey key)
         {
             try
             {
@@ -85,20 +85,15 @@ namespace Mvvm.CodeGen
             }
         }
 
-        internal static void DoCopy(CopyContext context, object source, object destination)
+        private static void DoCopy(CopyContext context, object source, object destination)
         {
             try
             {
-                Queue<object> values = new Queue<object>();
-                foreach (var get in context.Getters)
+                var get_set = context.Getters.Zip(context.Setters, (a, b) => new { get = a, set = b });
+                foreach (var gs in get_set)
                 {
-                    var val = get.Invoke(source, null);
-                    values.Enqueue(val);
-                }
-                foreach (var set in context.Setters)
-                {
-                    var val = values.Dequeue();
-                    set.Invoke(destination, new[] { val });
+                    var val = gs.get.Invoke(source, null);
+                    gs.set.Invoke(destination, new[] { val });
                 }
             }
             catch (Exception ex)
