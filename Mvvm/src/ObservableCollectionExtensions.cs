@@ -107,5 +107,27 @@ namespace Mvvm
             foreach (var e in ie)
                 collection.Add(e);
         }
+
+        public static void ReplaceWith<T>(this ObservableCollection<T> collection, IEnumerable<T> ie)
+        {
+            // need to enumerate it multiple times, so buffer it
+            ie = ie.ToArray();
+
+            foreach (var e in ie)
+                if (!collection.Contains(e))
+                    collection.Add(e);
+
+            collection.RemoveWhere(x => !ie.Contains(x));
+        }
+
+        public static void RemoveWhere<T>(this ObservableCollection<T> collection, Predicate<T> predicate )
+        {
+            var toRemove = new List<T>();
+            foreach (var e in collection)
+                if (predicate(e))
+                    toRemove.Add(e);
+            foreach (var e in toRemove)
+                collection.Remove(e);
+        }
     }
 }

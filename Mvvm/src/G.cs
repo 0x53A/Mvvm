@@ -135,10 +135,6 @@ namespace Mvvm
 
         internal void Recalculate()
         {
-            // wpf resets all attached properties when a template gets destroyed, but this would cause some exceptions
-            if (StackTraceHelper.Get().Contains("ClearTemplateChain"))
-                return;
-
             var rows = grid.RowDefinitions.Count;
             if (rows == 0)
                 rows = 1;
@@ -225,6 +221,10 @@ namespace Mvvm
 
         static void OnRowsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
+            // wpf resets all attached properties when a template gets destroyed, but this would cause some exceptions
+            if (StackTraceHelper.Get().Contains("ClearTemplateChain"))
+                return;
+
             var grid = obj as Grid;
             if (grid == null)
                 throw new Exception();
@@ -259,6 +259,10 @@ namespace Mvvm
 
         static void OnColumnsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
+            // wpf resets all attached properties when a template gets destroyed, but this would cause some exceptions
+            if (StackTraceHelper.Get().Contains("ClearTemplateChain"))
+                return;
+
             var grid = obj as Grid;
             if (grid == null)
                 throw new Exception();
@@ -300,6 +304,10 @@ namespace Mvvm
 
         static void OnAutoArrangeChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
+            // wpf resets all attached properties when a template gets destroyed, but this would cause some exceptions
+            if (StackTraceHelper.Get().Contains("ClearTemplateChain"))
+                return;
+
             var grid = obj as Grid;
             if (grid == null)
                 throw new Exception();

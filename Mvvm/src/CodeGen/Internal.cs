@@ -15,14 +15,7 @@ namespace Mvvm.CodeGen
 {
     internal static class CodeGenHelper
     {
-        internal static MethodInfo GetMethod<T>(Func<T> del) { return del.Method; }
-        internal static MethodInfo GetMethod<T>(Action<T> del) { return del.Method; }
-        internal static MethodInfo GetMethod<T1, T2>(Func<T1, T2> del) { return del.Method; }
-        internal static MethodInfo GetMethod<T1, T2>(Action<T1, T2> del) { return del.Method; }
-        internal static MethodInfo GetMethod<T1, T2, T3>(Func<T1, T2, T3> del) { return del.Method; }
-        internal static MethodInfo GetMethod<T1, T2, T3>(Action<T1, T2, T3> del) { return del.Method; }
-        internal static MethodInfo GetMethod<T1, T2, T3, T4>(Func<T1, T2, T3, T4> del) { return del.Method; }
-        internal static MethodInfo GetMethod<T1, T2, T3, T4>(Action<T1, T2, T3, T4> del) { return del.Method; }
+        internal static MethodInfo GetMethod(Delegate del) { return del.Method; }
     }
 
     internal class CodeGenInternal
@@ -78,8 +71,6 @@ namespace Mvvm.CodeGen
 
         internal static MethodBuilder ImplementBaseRaise(TypeBuilder typeBuilder)
         {
-            //var dummyRaiseBasePropertyChanged = typeBuilder.DefineMethod("RaiseBasePropertyChanged", PrivateStaticMethodAttributes, null, new Type[] { typeof(object), typeof(string) });
-            //var ilRaise = dummyRaiseBasePropertyChanged.GetILGenerator();
             /***************/
             // Declaring method builder
             // Method attributes
@@ -254,39 +245,10 @@ namespace Mvvm.CodeGen
             //return dummyRaiseBasePropertyChanged;
         }
 
-        //private static void Swap(Type type, MethodBuilder dummy, MethodInfo replacement)
-        //{
-        //    var body = replacement.GetMethodBody();
-        //    var bytesBody = body.GetILAsByteArray();
-        //    var ms = new MemoryStream();
-        //    byte flag = 0x03;
-        //    if (body.InitLocals)
-        //        flag |= 0x10;
-        //    if (body.ExceptionHandlingClauses.Any())
-        //        flag |= 0x08;
-        //    ms.WriteByte(flag);
-        //    ms.WriteByte(0x30);
-        //    ms.Write(BitConverter.GetBytes((short)body.MaxStackSize));
-        //    ms.Write(BitConverter.GetBytes((Int32)bytesBody.Length));
-        //    ms.Write(BitConverter.GetBytes((Int32)body.LocalSignatureMetadataToken));            
-        //    ms.Write(bytesBody);
-        //    var blob = ms.ToArray();
-        //    var handle = GCHandle.Alloc(blob, GCHandleType.Pinned);
-        //    var ptr = handle.AddrOfPinnedObject();
-        //    MethodRental.SwapMethodBody(type, dummy.GetToken().Token, ptr, blob.Length, MethodRental.JitImmediate);
-        //    handle.Free();
-        //}
-
-        //internal static void SwapDummies(Type type, MethodBuilder dummyfindEventField, MethodBuilder dummyRaiseBasePropertyChanged)
-        //{
-        //    var methodRaise = CodeGenHelper.GetMethod((Action<object, string>)RaiseBasePropertyChanged);
-        //    Swap(type, dummyRaiseBasePropertyChanged, methodRaise);
-        //}
-
         /************************************************************************/
         /* This needs to be implemented inside the dynamic class*****************/
         /************************************************************************/
-        
+
         private static void RaiseBasePropertyChanged(object self, string property)
         {
             var type = self.GetType().BaseType;

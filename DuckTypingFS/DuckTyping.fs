@@ -9,14 +9,13 @@ open System.Collections.Generic
 open System.Threading
 open System.Threading.Tasks
 
-
 type MappingKey = { TDuck : Type; TThing : Type }
 type MappingValue = { T : Type; Init : Action<Object,Object> }
 
-type DuckTyping =
+type DuckTyping() =
   class
-    static member private _mappings = new Dictionary<MappingKey, MappingValue>()
-    static member private _lock = new Object()
+    static member val _mappings = new Dictionary<MappingKey, MappingValue>() with get,set
+    static member val private _lock = new Object() with get,set
 
     ///Maps a Thing-Type to an interface-Type.
     ///Returns the mapped type and a function to initialise it

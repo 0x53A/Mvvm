@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -9,6 +10,25 @@ using System.Xml.Serialization;
 
 namespace Mvvm
 {
+    public class GenericEqualityComparer<T> : IEqualityComparer<T>
+    {
+        Func<T, T, bool> _comparisonFunc;
+        public GenericEqualityComparer(Func<T, T, bool> comparisonFunc)
+        {
+            _comparisonFunc = comparisonFunc;
+        }
+
+        bool IEqualityComparer<T>.Equals(T x, T y)
+        {
+            return _comparisonFunc(x, y);
+        }
+
+        int IEqualityComparer<T>.GetHashCode(T obj)
+        {
+            return 0;
+        }
+    }
+
     public static class TaskExtensions
     {
         public static T AwaitSynchrnonously<T>(this Task<T> task)
@@ -137,28 +157,24 @@ namespace Mvvm
                 return action(source);
         }
 
-        private class EqualityComparer<T> : IEqualityComparer<T>
-        {
-            Func<T, T, bool> _comparisonFunc;
-            public EqualityComparer(Func<T, T, bool> comparisonFunc)
-            {
-                _comparisonFunc = comparisonFunc;
-            }
-
-            bool IEqualityComparer<T>.Equals(T x, T y)
-            {
-                return _comparisonFunc(x, y);
-            }
-
-            int IEqualityComparer<T>.GetHashCode(T obj)
-            {
-                return 0;
-            }
-        }
-
         public static IEnumerable<TSource> Distinct<TSource>(this IEnumerable<TSource> source, Func<TSource, TSource, bool> comparisonFunc)
         {
-            return source.Distinct(new EqualityComparer<TSource>(comparisonFunc));
+            return source.Distinct(new GenericEqualityComparer<TSource>(comparisonFunc));
+        }
+
+        public static IEnumerable<TSource> DistinctBy<TSource, TDistinct>(this IEnumerable<TSource> source, Func<TSource, TDistinct> selector, IEqualityComparer<TDistinct> comparer)
+        {
+            return source.Distinct((a, b) => comparer.Equals(selector(a), selector(b)));
+        }
+
+        public static IEnumerable<TSource> DistinctBy<TSource, TDistinct>(this IEnumerable<TSource> source, Func<TSource, TDistinct> selector, IEqualityComparer comparer)
+        {
+            return source.Distinct((a, b) => comparer.Equals(selector(a), selector(b)));
+        }
+
+        public static IEnumerable<TSource> Distinct<TSource>(this IEnumerable<TSource> source, IEqualityComparer comparer)
+        {
+            return source.Distinct(new GenericEqualityComparer<TSource>((a,b)=>comparer.Equals(a,b)));
         }
     }
 
@@ -198,6 +214,11 @@ namespace Mvvm
         public static string FormatWith(this string format, params object[] args)
         {
             return String.Format(format, args);
+        }
+
+        public static string F(this string format, params object[] args)
+        {
+            return FormatWith(format, args);
         }
 
         public static string[] Split(this string str, params string[] splitters)
