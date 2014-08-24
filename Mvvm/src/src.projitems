@@ -42,6 +42,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Parsing\FixedTokensParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RelayCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StackTraceHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StringInterpolation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TGuid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UniquePtr.cs" />

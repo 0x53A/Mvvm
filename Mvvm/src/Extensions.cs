@@ -37,7 +37,7 @@ namespace Mvvm
             return task.Result;
         }
     }
-    
+
 
     /// <summary>
     /// Extensions to Stream
@@ -174,7 +174,7 @@ namespace Mvvm
 
         public static IEnumerable<TSource> Distinct<TSource>(this IEnumerable<TSource> source, IEqualityComparer comparer)
         {
-            return source.Distinct(new GenericEqualityComparer<TSource>((a,b)=>comparer.Equals(a,b)));
+            return source.Distinct(new GenericEqualityComparer<TSource>((a, b) => comparer.Equals(a, b)));
         }
     }
 
@@ -219,6 +219,11 @@ namespace Mvvm
         public static string F(this string format, params object[] args)
         {
             return FormatWith(format, args);
+        }
+
+        public static string Interpolate(this string format, object o)
+        {
+            return StringInterpolation.Do(format, o);
         }
 
         public static string[] Split(this string str, params string[] splitters)
