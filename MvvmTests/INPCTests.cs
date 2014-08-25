@@ -1,5 +1,9 @@
 ﻿using System;
+#if UNIVERSAL
+using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+#else
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+#endif
 using Mvvm;
 using Mvvm.CodeGen;
 

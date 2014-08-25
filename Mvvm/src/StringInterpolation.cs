@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,14 +11,20 @@ using System.Web.UI;
 
 namespace Mvvm
 {
+    public class StringInterpolationException : Exception
+    {
+        public StringInterpolationException() : base() { }
+        public StringInterpolationException(string msg) : base(msg) { }
+        public StringInterpolationException(string msg, Exception ex) : base(msg, ex) { }
+     }
+
     public static class StringInterpolation
     {
         public static string Do(string format, object o)
         {
-            if (format == null)
-                throw new ArgumentNullException("format");
-            if (o == null)
-                throw new ArgumentNullException("o");
+            Contract.Requires(format != null);
+            Contract.Requires(o != null);
+
             // find the indizes of the braces
             var openings = new List<int>();
             var closings = new List<int>();
@@ -42,10 +49,10 @@ namespace Mvvm
                 else
                     iClosing += 1;
             if (openings.Count != closings.Count)
-                throw new InvalidDataException("The number of opening braces is not equal the number of closing braces.");
+                throw new StringInterpolationException("The number of opening braces is not equal the number of closing braces.");
 
             if (openings.Count == 0)
-                return format;
+                return format.Replace("{{", "{").Replace("}}", "}");
 
             var pairs = openings.Zip(closings, (iOpen, iClose) => new { iOpen, iClose }).ToArray();
             var sb = new StringBuilder();
@@ -53,37 +60,44 @@ namespace Mvvm
             {
                 var pair = pairs[iPair];
                 if (pair.iClose < pair.iOpen)
-                    throw new InvalidDataException("Unexpected '}}' at {0}.".F(pair.iClose));
+                    throw new StringInterpolationException("Unexpected '}}' at {0}.".F(pair.iClose));
                 var between = format.Substring(pair.iOpen + 1, pair.iClose - pair.iOpen - 1).Trim();
                 if (between.Length == 0)
-                    throw new InvalidDataException("Error: '{}'.");
+                    throw new StringInterpolationException("Error: '{}'.");
                 string propName;
                 string formatter = null;
-                var iColons = between.Count(c => c == ':');
-                if (iColons == 0)
+                var nColons = between.Count(c => c == ':');
+                if (nColons == 0)
                     propName = between;
-                else if (iColons == 1)
+                else if (nColons == 1)
                 {
                     var asd = between.Split(':');
                     propName = asd[0];
                     formatter = asd[1];
                 }
                 else
-                    throw new InvalidDataException("Error: More than one ':'");
+                    throw new StringInterpolationException("Error: More than one ':'");
                 int lastClosing = -1;
                 if (iPair > 0)
                     lastClosing = pairs[iPair - 1].iClose;
                 if (pair.iOpen - lastClosing > 1)
-                    sb.Append(format.Substring(lastClosing + 1, pair.iOpen - lastClosing - 1));
+                    sb.Append(format.Substring(lastClosing + 1, pair.iOpen - lastClosing - 1).Replace("{{", "{").Replace("}}", "}"));
 
-                if (formatter != null)
-                    sb.Append(DataBinder.Eval(o, propName, formatter));
-                else
-                    sb.Append(DataBinder.Eval(o, propName));
+                try
+                {
+                    if (formatter != null)
+                        sb.Append(DataBinder.Eval(o, propName, formatter));
+                    else
+                        sb.Append(DataBinder.Eval(o, propName));
+                }
+                catch (Exception ex)
+                {
+                    throw new StringInterpolationException("Error evaluating '{0}', see inner exception".F(propName), ex);
+                }
             }
             var lastClose = pairs.Last().iClose;
             if (lastClose < format.Length - 1)
-                sb.Append(format.Substring(lastClose + 1));
+                sb.Append(format.Substring(lastClose + 1).Replace("{{", "{").Replace("}}", "}"));
             return sb.ToString();
         }
     }
