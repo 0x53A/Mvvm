@@ -71,6 +71,6 @@ public static class Asd
 {
     public static string Asdd(string format, object o)
     {
-        return Mvvm.FSharp.StringInterpolation.Do(format, o);
+        return Mvvm.StringInterpolation.Do(format, o);
     }
 }
