@@ -30,6 +30,10 @@ namespace TestConsole
     {
         static void Main(string[] args)
         {
+            Mvvm.FSharp.StringInterpolation.Do("{hello} {world}", new { hello = "Hello", world = "World" });
+            Mvvm.FSharp.StringInterpolation.Do("{{{hello:x}}} {{world{world:xxx}x", new { hello = "Hello", world = "World" });
+
+
             var asd = new Thing();
             dynamic iAsd = DuckTyping.Cast<IDuck>(asd);
             var foo = iAsd.Foo;

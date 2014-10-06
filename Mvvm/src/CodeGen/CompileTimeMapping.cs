@@ -24,15 +24,17 @@ namespace Mvvm.CodeGen
 
             public Assembly[] GetAssemblies()
             {
-                return GetAssemblyListAsync().Result.ToArray();
+                Func<Task<List<Assembly>>> asd = async () => await GetAssemblyListAsync().ConfigureAwait(false);
+                return asd().Result.ToArray();
             }
 
-            private async System.Threading.Tasks.Task<IEnumerable<Assembly>> GetAssemblyListAsync()
+            private async System.Threading.Tasks.Task<List<Assembly>> GetAssemblyListAsync()
             {
                 var folder = Windows.ApplicationModel.Package.Current.InstalledLocation;
 
                 List<Assembly> assemblies = new List<Assembly>();
-                foreach (Windows.Storage.StorageFile file in await folder.GetFilesAsync())
+                var files = await folder.GetFilesAsync().AsTask().ConfigureAwait(false);
+                foreach (Windows.Storage.StorageFile file in files)
                 {
                     if (file.FileType == ".dll" || file.FileType == ".exe")
                     {

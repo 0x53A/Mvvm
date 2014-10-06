@@ -15,7 +15,7 @@ module Internal =
         if condition then
             raise (exn())
 
-    let rec scanForHoles (format : string) iStart iCurrent isInHole = seq {
+    let rec parseFormatString (format : string) iStart iCurrent isInHole = [|
         match isInHole with
         | true ->
             // in a hole, so search for the end,  ...
@@ -34,32 +34,33 @@ module Internal =
                     (splitted.[0].Trim(), Some (splitted.[1].Trim()))
                 |_ -> raise(StringInterpolationException( "more than one ':'"))
             yield Hole(expr, formatter)
-            yield! scanForHoles format (iEnd + 1) (iEnd + 1) false
+            yield! parseFormatString format (iEnd + 1) (iEnd + 1) false
         | false ->
-            let getUntilNow() = String(format.Substring(iStart, iCurrent-1))
             if format.Length = iCurrent then
-                yield getUntilNow()
+                if iStart < iCurrent then
+                    yield String(format.Substring(iStart))
             else
                 let next = if format.Length > iCurrent + 1 then Some format.[iCurrent+1] else None
                 let current = format.[iCurrent]
+                let getUntilNow() = String(format.Substring(iStart, iCurrent-iStart))
                 match (current, next) with
                 | ('{',Some('{')) ->
-                    if iCurrent - 1 > iStart then
+                    if iCurrent > iStart then
                         yield getUntilNow()
                     yield String("{")
-                    yield! scanForHoles format (iCurrent+1) (iCurrent+1) false
+                    yield! parseFormatString format (iCurrent+2) (iCurrent+2) false
                 | ('{', _) ->
-                    if iCurrent - 1 > iStart then
+                    if iCurrent > iStart then
                         yield getUntilNow()
-                    yield! scanForHoles format (iCurrent+1) (iCurrent+1) true
+                    yield! parseFormatString format (iCurrent+1) (iCurrent+1) true
                 | ('}', Some('}')) ->
-                    if iCurrent - 1 > iStart then
+                    if iCurrent > iStart then
                         yield getUntilNow()
                     yield String("}")
-                    yield! scanForHoles format (iCurrent+1) (iCurrent+1) false
+                    yield! parseFormatString format (iCurrent+2) (iCurrent+2) false
                 | ('}', _) -> raise (StringInterpolationException("unexpected '}'"))
-                | _ -> yield! scanForHoles format iStart (iCurrent+1) false
-    }
+                | _ -> yield! parseFormatString format iStart (iCurrent+1) false
+    |]
 
 open Internal
 open System
@@ -68,7 +69,7 @@ type StringInterpolation =
     static member Do format (o:Object) =
         fail_if (format = null) (fun ()->ArgumentNullException("format"))
         fail_if (o = null) (fun ()->ArgumentNullException("o"))
-        let info = scanForHoles format 0 0 false
+        let info = parseFormatString format 0 0 false
         let outSb = System.Text.StringBuilder()
         for x in info do
             match x with
