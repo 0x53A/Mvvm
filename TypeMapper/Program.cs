@@ -11,6 +11,7 @@ using Mvvm;
 using Mvvm.CodeGen;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace TypeMapper
 {
@@ -185,6 +186,8 @@ namespace TypeMapper
 
         static void Main(string[] args)
         {
+            //Debugger.Launch();
+            //Debugger.Break();
             if (args.Length < 2)
                 Environment.Exit(-1);
 
@@ -193,8 +196,41 @@ namespace TypeMapper
                 Environment.Exit(-1);
 
             var outPath = args[1];
+            System.Runtime.InteropServices.WindowsRuntime.WindowsRuntimeMetadata.ReflectionOnlyNamespaceResolve += (a, eventArgs) =>
+            {
+                string path = WindowsRuntimeMetadata.ResolveNamespace(eventArgs.NamespaceName, Enumerable.Empty<string>()).FirstOrDefault();
+                if (path == null) return;
 
-            var asm = Assembly.LoadFrom(asmPath);
+                eventArgs.ResolvedAssemblies.Add(Assembly.ReflectionOnlyLoadFrom(path));
+            };
+            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (a, b) =>
+            {
+                try
+                {
+                    var dllDir = Path.GetDirectoryName(asmPath);
+                    var dllName = b.Name.Split(',')[0];
+                    var dllPath = Path.Combine(dllDir, dllName + ".dll");
+                    if (File.Exists(dllPath))
+                        return Assembly.ReflectionOnlyLoadFrom(dllPath);
+                    else if (b.Name.StartsWith("Windows,"))
+                        return Assembly.ReflectionOnlyLoadFrom(@"C:\Program Files (x86)\Windows Kits\8.0\References\CommonConfiguration\Neutral\Windows.winmd");
+                    else
+                        return Assembly.ReflectionOnlyLoad(b.Name);
+                }
+                catch (Exception)
+                {
+                    try
+                    {
+                        var location = Assembly.Load(b.Name).Location;
+                        return Assembly.ReflectionOnlyLoadFrom(location);
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                }
+            };
+            var asm = Assembly.ReflectionOnlyLoadFrom(asmPath);
             var types = asm.GetTypes().Where(t => t.GetCustomAttributesData()
                 .Any(a => a.AttributeType.Name == typeof(TypeOverrideAttribute).Name)).ToArray();
             var abstractTypes = types.Where(t => t.IsAbstract && !t.IsInterface);
