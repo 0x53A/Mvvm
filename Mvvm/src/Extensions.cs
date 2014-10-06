@@ -29,15 +29,6 @@ namespace Mvvm
         }
     }
 
-    public static class TaskExtensions
-    {
-        public static T AwaitSynchrnonously<T>(this Task<T> task)
-        {
-            task.Wait();
-            return task.Result;
-        }
-    }
-
 
     /// <summary>
     /// Extensions to Stream
