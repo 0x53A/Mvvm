@@ -105,7 +105,7 @@ namespace Mvvm.CodeGen
             }
 
             var access = (dump == true) ? AssemblyBuilderAccess.RunAndSave : AssemblyBuilderAccess.Run;
-            var assemblyName = "assembly_{0}_{1}".FormatWith(targetType.FullName, Guid.NewGuid());
+            var assemblyName = "assembly_{0}_{1}_{2}".FormatWith(targetType.Namespace, targetType.Name, Guid.NewGuid());
             var ab = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName), access);
 
             ModuleBuilder mb;
@@ -115,9 +115,12 @@ namespace Mvvm.CodeGen
                 mb = ab.DefineDynamicModule("generated");
 
             var attr = targetType.GetCustomAttribute<TypeOverrideAttribute>();
-            var name = attr != null ? attr.TypeName : targetType.Namespace;
-            name = name ?? targetType.FullName;
+            var name = attr != null ? attr.TypeName : "{0}.{1}".FormatWith(targetType.Namespace, targetType.Name);
+            name = name ?? "{0}.{1}".FormatWith(targetType.Namespace, targetType.Name);
             var tb = mb.DefineType(name, CodeGenInternal.GeneratedTypeAttributes, null, new[] { targetType, typeof(INotifyPropertyChanged) });
+
+            var attributeBuilder = new CustomAttributeBuilder(RuntimeGeneratedTypeAttribute.CtorInfo, new[] { targetType });
+            tb.SetCustomAttribute(attributeBuilder);
 
             var constructor = tb.DefineConstructor(CodeGenInternal.ConstructorAttributes, CallingConventions.HasThis, null);
             var ctorIL = constructor.GetILGenerator();

@@ -23,6 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CodeGen\CompileTimeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGen\InterfaceImplementor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGen\InterfaceCopy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGen\InterfaceSerialization.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGen\Internal.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGen\TypeOverrideAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGen\AbstractClassImplementor.cs" />
@@ -36,7 +37,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Grid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IEventTriggerCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)INPC.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)InterfaceSerialization.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Net40Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ObservableCollectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parsing\FixedTokensParser.cs" />
