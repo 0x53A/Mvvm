@@ -40,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Net40Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ObservableCollectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Parsing\FixedTokensParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ReaderWriterLock.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RelayCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StackTraceHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringInterpolation.cs" />
