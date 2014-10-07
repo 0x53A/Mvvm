@@ -14,21 +14,21 @@ namespace Mvvm.CodeGen
     /// Notifies the VMWrapper that this Property should be overridden and implement INotifyPropertyChanged.
     /// It can only be applied to properties with getter and setter
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
-    public class InpcAttribute : Attribute
-    {
+    //[AttributeUsage(AttributeTargets.Property)]
+    //public class InpcAttribute : Attribute
+    //{
 
-    }
+    //}
 
     /// <summary>
     /// Notifies the VMWrapper that this property should be overridden and implemented using Lazy initialization.
     /// It can only be applied to get-only properties
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
-    public class LazyAttribute : Attribute
-    {
+    //[AttributeUsage(AttributeTargets.Property)]
+    //public class LazyAttribute : Attribute
+    //{
 
-    }
+    //}
 
     internal static class AbstractClassImplementor
     {
@@ -84,7 +84,7 @@ namespace Mvvm.CodeGen
             }
 
             var access = (dump == true) ? AssemblyBuilderAccess.RunAndSave : AssemblyBuilderAccess.Run;
-            var assemblyName = "assembly_{0}_{1}".FormatWith(targetType.FullName, Guid.NewGuid());
+            var assemblyName = "assembly_{0}_{1}_{2}".FormatWith(targetType.Namespace, targetType.Name, Guid.NewGuid());
             var ab = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(assemblyName), access);
 
             ModuleBuilder mb;
@@ -96,10 +96,11 @@ namespace Mvvm.CodeGen
             bool hasINPC = targetType.GetInterfaces().Contains(typeof(INotifyPropertyChanged));
             var interfacesToImplement = hasINPC ? Type.EmptyTypes : new[] { typeof(INotifyPropertyChanged) };
             var attr = targetType.GetCustomAttribute<TypeOverrideAttribute>();
-            var typeName = attr != null ? attr.TypeName : targetType.FullName;
-            typeName = typeName ?? targetType.FullName;
+            var typeName = attr != null ? attr.TypeName : "{0}.{1}".FormatWith(targetType.Namespace, targetType.Name);
+            typeName = typeName ?? "{0}.{1}".FormatWith(targetType.Namespace, targetType.Name);
             var tb = mb.DefineType(typeName, CodeGenInternal.GeneratedTypeAttributes, targetType, interfacesToImplement);
-
+            var attributeBuilder = new CustomAttributeBuilder(RuntimeGeneratedTypeAttribute.CtorInfo, new[] { targetType });
+            tb.SetCustomAttribute(attributeBuilder);
             var constructor = tb.DefineConstructor(CodeGenInternal.ConstructorAttributes, CallingConventions.HasThis, null);
             var ctorIL = constructor.GetILGenerator();
 
@@ -115,9 +116,9 @@ namespace Mvvm.CodeGen
 
             foreach (var property in targetType.GetProperties())
             {
-                if ((property.CanRead && property.CanWrite && property.GetGetMethod().IsAbstract && property.GetSetMethod().IsAbstract) || property.GetCustomAttributes(false).Any(a => a is InpcAttribute))
+                if ((property.CanRead && property.CanWrite && property.GetGetMethod().IsAbstract && property.GetSetMethod().IsAbstract) /*|| property.GetCustomAttributes(false).Any(a => a is InpcAttribute)*/)
                     CodeGenInternal.CreateReadWriteProperty(tb, property, raiseMethod, false);
-                else if ((property.CanRead && (!property.CanWrite) && property.GetGetMethod().IsAbstract) || property.GetCustomAttributes(false).Any(a => a is LazyAttribute))
+                else if ((property.CanRead && (!property.CanWrite) && property.GetGetMethod().IsAbstract) /*|| property.GetCustomAttributes(false).Any(a => a is LazyAttribute)*/)
                     CodeGenInternal.CreateReadOnlyLazyProperty(tb, property, ctorIL, false);
             }
 
