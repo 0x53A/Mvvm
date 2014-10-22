@@ -20,7 +20,7 @@ namespace Mvvm.CodeGen
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public class RuntimeGeneratedTypeAttribute : Attribute
     {
-        public static ConstructorInfo CtorInfo = typeof(RuntimeGeneratedTypeAttribute).GetConstructor(new []{typeof(Type)});
+        public static ConstructorInfo CtorInfo = typeof(RuntimeGeneratedTypeAttribute).GetTypeInfo().GetConstructor(new []{typeof(Type)});
 
         Type _generatedFrom;
         public RuntimeGeneratedTypeAttribute(Type generatedFrom)
