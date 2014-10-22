@@ -119,8 +119,8 @@ namespace TypeMapper
             Func<PropertyInfo, bool> InpcFilter = null;
             if (isAbstract)
             {
-                lazyFilter = p => (p.GetMethod != null && p.SetMethod == null && p.GetMethod.IsAbstract) || p.GetCustomAttributesData().Any(a => a.AttributeType.Name == typeof(LazyAttribute).Name);
-                InpcFilter = p => (p.GetMethod != null && p.SetMethod != null && p.GetMethod.IsAbstract && p.SetMethod.IsAbstract) || p.GetCustomAttributesData().Any(a => a.AttributeType.Name == typeof(InpcAttribute).Name);
+                lazyFilter = p => (p.GetMethod != null && p.SetMethod == null && p.GetMethod.IsAbstract);
+                InpcFilter = p => (p.GetMethod != null && p.SetMethod != null && p.GetMethod.IsAbstract && p.SetMethod.IsAbstract);
             }
             else
             {

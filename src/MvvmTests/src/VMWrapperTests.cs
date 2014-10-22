@@ -12,13 +12,9 @@ namespace MvvmTests
         [TypeOverride]
         public abstract class VmWithInpc : ViewModelBase
         {
-            [Inpc]
             public abstract int Foo { get; set; }
-            [Inpc]
             public abstract object Bar { get; set; }
-            [Lazy]
             public abstract List<int> FooBar { get; }
-            [Lazy]
             public abstract List<object> BarFoo { get; }
 
             int _asd;
@@ -33,13 +29,9 @@ namespace MvvmTests
         [TypeOverride]
         public abstract class VmWithoutInpc
         {
-            [Inpc]
             public abstract int Foo { get; set; }
-            [Inpc]
             public abstract object Bar { get; set; }
-            [Lazy]
             public abstract List<int> FooBar { get; }
-            [Lazy]
             public abstract List<object> BarFoo { get; }
 
             public VmWithoutInpc()

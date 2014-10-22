@@ -116,6 +116,11 @@ namespace Mvvm
         {
             return ti.ImplementedInterfaces;
         }
+
+        public static ConstructorInfo GetConstructor(this TypeInfo ti, Type[] args)
+        {
+            return ti.DeclaredConstructors.SingleOrDefault(c => c.GetParameters().Select(p=>p.ParameterType).SequenceEqual(args));
+        }
 #endif
     }
 
@@ -126,8 +131,18 @@ namespace Mvvm
 #if NET40
             return new Task<T>(() => result);
 #else
-            return  Task.FromResult(result);
+            return Task.FromResult(result);
 #endif
         }
     }
+
+#if UNIVERSAL
+    public static class UniversalExtensions
+    {
+        public static string GetString(this Encoding encoding, byte[] bytes)
+        {
+            return encoding.GetString(bytes, 0, bytes.Length);
+        }
+    }
+#endif
 }

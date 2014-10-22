@@ -113,18 +113,6 @@
     <SDKReference Include="TestPlatform, Version=11.0" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\MvvmTests\INPCBinding.cs">
-      <Link>INPCBinding.cs</Link>
-    </Compile>
-    <Compile Include="..\MvvmTests\INPCTests.cs">
-      <Link>INPCTests.cs</Link>
-    </Compile>
-    <Compile Include="..\MvvmTests\StringInterpolation.cs">
-      <Link>StringInterpolation.cs</Link>
-    </Compile>
-    <Compile Include="..\MvvmTests\XmlSerialization.cs">
-      <Link>XmlSerialization.cs</Link>
-    </Compile>
     <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -149,7 +137,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mvvm\Mvvm_Universal\Mvvm_Universal.csproj">
+    <ProjectReference Include="..\..\Mvvm\Mvvm_Universal\Mvvm_Universal.csproj">
       <Project>{84800cb3-aff5-41fd-a5fe-dba3d9ce7f9f}</Project>
       <Name>Mvvm_Universal</Name>
     </ProjectReference>

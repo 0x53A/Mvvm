@@ -49,14 +49,14 @@ namespace Mvvm
                 {
                     if (t.GetTypeInfo().GetCustomAttribute<RuntimeGeneratedTypeAttribute>() != null)
                         types.Add(t);
-                    else if (t.IsAbstract && t.IsClass)
+                    else if (t.GetTypeInfo().IsAbstract && t.GetTypeInfo().IsClass)
                         types.Add(CG.Map(t));
-                    else if (t.IsInterface)
+                    else if (t.GetTypeInfo().IsInterface)
                     {
-                        if (t.GetCustomAttribute<TypeOverrideAttribute>() != null)
+                        if (t.GetTypeInfo().GetCustomAttribute<TypeOverrideAttribute>() != null)
                             types.Add(CG.Map(t));
                         else if (t.Namespace == "System.Collections.Generic" && t.Name == "IList`1")
-                            types.Add(typeof(List<>).MakeGenericType(t.GenericTypeArguments));
+                            types.Add(typeof(List<>).MakeGenericType(t.GetGenericTypeArguments().ToArray()));
                         else
                             types.Add(CG.Map(t));
                     }
@@ -68,8 +68,6 @@ namespace Mvvm
 
         class GeneratedTypeDataContractResolver : DataContractResolver
         {
-            private XsdDataContractExporter _exporter = new XsdDataContractExporter();
-
             public override Type ResolveName(string typeName, string typeNamespace, Type declaredType, DataContractResolver knownTypeResolver)
             {
                 return knownTypeResolver.ResolveName(typeName, typeNamespace, declaredType, null);
@@ -111,7 +109,7 @@ namespace Mvvm
             var overridden = GetMapping(typeof(T));
             DataContractSerializer serializer = new DataContractSerializer(typeof(T), overridden);
             using (var sr = new MemoryStream(Encoding.UTF8.GetBytes(s)))
-            using (var xReader = XmlDictionaryReader.CreateTextReader(sr, new XmlDictionaryReaderQuotas()))
+            using (var xReader = XmlDictionaryReader.CreateTextReader(sr, XmlDictionaryReaderQuotas.Max))
                 return (T)serializer.ReadObject(xReader, true/*, new GeneratedTypeDataContractResolver()*/);
         }
 
