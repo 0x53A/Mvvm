@@ -27,8 +27,7 @@ Target "BuildApp" (fun _ ->
 )
 
 Target "BuildTest" (fun _ ->
-    !! "src/MvvmTests/**/*.csproj"
-    -- "./**/*WP8.csproj"
+    !! "src/MvvmTests/Mvvm/MvvmTests.csproj"
       |> MSBuildDebug testDir "Build"
       |> Log "TestBuild-Output: "
 )

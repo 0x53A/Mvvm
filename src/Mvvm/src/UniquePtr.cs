@@ -29,7 +29,7 @@ namespace Mvvm
 
         public void Dispose()
         {
-            if (!_handle.Equals(default(T)))
+            if (false == EqualityComparer<T>.Default.Equals(_handle, default(T)))
             {
                 var h = _handle;
                 _handle = default(T);
