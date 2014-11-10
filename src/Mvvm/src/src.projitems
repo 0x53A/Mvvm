@@ -9,6 +9,7 @@
     <Import_RootNamespace>Mvvm</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInitializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)App\Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)App\INavigationObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)App\INavigationService.cs" />
