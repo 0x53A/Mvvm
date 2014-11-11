@@ -10,7 +10,7 @@ using System.Linq;
 namespace Mvvm
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    sealed class AssemblyInitializerAttribute : Attribute
+    public class AssemblyInitializerAttribute : Attribute
     {
         public AssemblyInitializerAttribute()
         {
