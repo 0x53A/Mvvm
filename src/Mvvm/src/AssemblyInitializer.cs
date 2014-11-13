@@ -36,7 +36,12 @@ namespace Mvvm
 
         public static IAssemblyInitializer Find(Assembly asm)
         {
-            var suitableTypes = asm.GetExportedTypes()
+            IEnumerable<Assembly> assemblies;
+            if (asm == null)
+                assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+            else
+                assemblies = new[] { asm };
+            var suitableTypes = assemblies.SelectMany(a=>a.GetExportedTypes())
                 .Where(t =>
                     t.GetTypeInfo().GetInterfaces().Contains(typeof(IAssemblyInitializer)) &&
                     t.GetTypeInfo().GetCustomAttribute<AssemblyInitializerAttribute>() != null)
