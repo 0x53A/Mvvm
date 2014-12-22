@@ -35,6 +35,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)FirstClassEvents\Event.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FirstClassEvents\IEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Func\PatternMatching.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Func\Unit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)G.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Grid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IEventTriggerCommand.cs" />
